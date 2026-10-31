@@ -11,7 +11,7 @@ function Cardapio({ itens, abrirNovoItem, editarItem, estoque }) {
   const itensFiltrados = useMemo(() => (
     itens
       .filter((item) => item.nome.toLowerCase().includes(pesquisa.toLowerCase()))
-      .filter((item) => filtro === 'Todos' || item.tipo === filtro)
+      .filter((item) => filtro === 'Todos' || item.tipo === filtro.toUpperCase())
   ), [itens, pesquisa, filtro])
 
   return (
@@ -81,7 +81,7 @@ function Cardapio({ itens, abrirNovoItem, editarItem, estoque }) {
                   </td>
                   <td>{item.tamanho} cm</td>
                   <td>{item.tipo}</td>
-                  <td>{item.receita.length} ingredientes</td>
+                  <td>-</td>
                   <td>
                     <span className={styles.statusNormal}>
                       ● {item.ativo ? 'Ativo' : 'Desativado'}

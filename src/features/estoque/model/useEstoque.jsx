@@ -11,7 +11,9 @@ export function useEstoque() {
   const [estoque, setEstoque] = useState([])
   const [painel, setPainel] = useState(null)
   const [mensagem, setMensagem] = useState('')
-  const [usuarioLogado, setUsuarioLogado] = useState(false)
+  const [usuarioLogado, setUsuarioLogado] = useState(
+  localStorage.getItem('usuarioLogado') === 'true'
+)
 
   useEffect(() => {
     listarInsumos().then(setEstoque)

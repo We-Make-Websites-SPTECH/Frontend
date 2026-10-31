@@ -1,8 +1,13 @@
-import { itensCardapioIniciais } from './itemCardapio.model'
-
 export async function listarItensCardapio() {
-  return Promise.resolve(itensCardapioIniciais.map((item) => ({ ...item, receita: [...item.receita] })))
-  // Substituir por GET /itens-cardapio quando a API estiver pronta.
+  const resposta = await fetch('http://localhost:8080/produto')
+
+  if(!resposta.ok) {
+    throw new Error('Erro ao buscar produtos')
+  }
+
+  return await resposta.json()
+
+  
 }
 
 export async function salvarItemCardapio(item) {

@@ -69,7 +69,7 @@ export function useVendas({ itens, aoBaixarEstoque, avisar }) {
     () => calcularConsumo(lista, itens),
     [lista, itens],
   )
-  const itensAtivos = itens.filter((item) => item.ativo && item.receita.length)
+  const itensAtivos = itens.filter((item) => item.ativo && item.receita?.length || 0)
 
   function adicionar(idSelecionado, quantidadeInformada) {
     const id = Number(idSelecionado || itensAtivos[0]?.id)
