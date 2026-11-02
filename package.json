@@ -13,7 +13,8 @@
     "vite": "^8.2.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "lucide-react": "^0.468.0"
+    "lucide-react": "^0.468.0",
+    "chart.js": "^4.6.1"
   },
   "devDependencies": {}
 }

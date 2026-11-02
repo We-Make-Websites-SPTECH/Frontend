@@ -1,0 +1,154 @@
+.colunasRanking {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  align-content: start;
+  flex: 1;
+  gap: 0;
+}
+
+.colunaRanking {
+  min-width: 0;
+  padding: 0 20px;
+}
+
+.colunaRanking:first-child {
+  padding-left: 0;
+}
+
+.colunaRanking:last-child {
+  padding-right: 0;
+}
+
+.colunaRanking + .colunaRanking {
+  border-left: 1px solid var(--borda);
+}
+
+.colunaRanking h3 {
+  margin: 0 0 14px;
+  color: var(--secundario);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+.listaRanking {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.itemRanking {
+  display: grid;
+  grid-template-columns: 17px minmax(0, 1fr) auto;
+  column-gap: 7px;
+  row-gap: 6px;
+  align-items: center;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.posicao {
+  color: var(--secundario);
+  font-size: 11px;
+}
+
+.nome {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.valor {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.trilha {
+  grid-column: 2 / 4;
+  display: block;
+  height: 5px;
+  overflow: hidden;
+  background: var(--borda);
+  border-radius: 4px;
+}
+
+.trilha > span {
+  display: block;
+  height: 100%;
+  background: var(--primaria);
+  border-radius: inherit;
+}
+
+.areaGrafico {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.areaGrafico canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.graficoVazio {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  padding: 18px;
+  color: var(--secundario);
+  text-align: center;
+  font-size: 13px;
+}
+
+.rosca {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
+}
+
+.rosca canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.roscaCentro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.roscaCentro strong {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.roscaCentro span {
+  margin-top: 5px;
+  color: var(--secundario);
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .colunaRanking {
+    padding: 0;
+  }
+
+  .colunaRanking + .colunaRanking {
+    margin-top: 2px;
+    padding-top: 16px;
+    border-top: 1px solid var(--borda);
+    border-left: 0;
+  }
+}

@@ -1,0 +1,312 @@
+.conteudo {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 28px 34px 50px;
+}
+
+.cabecalhoPagina {
+  margin-bottom: 24px;
+}
+
+.cabecalhoPagina small {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.cabecalhoPagina h1 {
+  margin: 6px 0;
+  font-size: 32px;
+}
+
+.cabecalhoPagina p {
+  margin: 6px 0 0;
+  color: var(--secundario);
+  font-size: 14px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  align-items: stretch;
+}
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 340px;
+  padding: 20px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 11px;
+}
+
+.tituloCartao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.tituloPrincipal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tituloPrincipal h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.icone {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  color: var(--primaria);
+  background: var(--fundo);
+  border-radius: 8px;
+  place-items: center;
+}
+
+.resumos {
+  display: flex;
+  gap: 18px;
+  flex: 0 0 auto;
+}
+
+.resumos > div {
+  padding-left: 18px;
+  border-left: 1px solid var(--borda);
+  text-align: right;
+}
+
+.resumos small {
+  display: block;
+  color: var(--secundario);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.resumos strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.verde {
+  color: var(--statusNormal);
+}
+
+.vermelho {
+  color: var(--primaria);
+}
+
+.semValor {
+  color: var(--secundario);
+}
+
+.resumos strong.semValor {
+  font-size: 20px;
+}
+
+.perdaTotal strong.semValor {
+  font-size: 24px;
+}
+
+.linhaFerramentas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.legenda {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+}
+
+.legenda span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ponto {
+  display: block;
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+
+.pontoVerde {
+  background: var(--statusNormal);
+}
+
+.pontoVermelho {
+  background: var(--primaria);
+}
+
+.seletorUnidade {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 3px;
+  padding: 3px;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: 7px;
+}
+
+.seletorUnidade button {
+  padding: 4px 9px;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seletorUnidade button.unidadeAtiva {
+  color: var(--fundo);
+  background: var(--texto);
+}
+
+.perdaTotal {
+  margin-bottom: 6px;
+}
+
+.perdaTotal strong {
+  display: block;
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.perdaTotal span {
+  display: block;
+  margin-top: 7px;
+  color: var(--secundario);
+  font-size: 13px;
+}
+
+.notaRodape {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  color: var(--secundario);
+  font-size: 12px;
+}
+
+.statusConteudo {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 190px minmax(0, 1fr);
+  align-items: center;
+  gap: 26px;
+}
+
+.legendaStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.linhaStatus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.linhaStatus span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.linhaStatus strong {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.linhaTotal {
+  margin-top: 2px;
+  padding-top: 14px;
+  border-top: 1px solid var(--borda);
+  font-weight: 700;
+}
+
+.linhaTotal strong {
+  font-size: 16px;
+}
+
+@media (max-width: 1150px) {
+  .grade {
+    grid-template-columns: 1fr;
+  }
+
+  .cartao {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .conteudo {
+    padding: 22px 18px 40px;
+  }
+
+  .tituloCartao {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .resumos {
+    width: 100%;
+  }
+
+  .resumos > div {
+    flex: 1;
+    text-align: left;
+  }
+
+  .resumos > div:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .linhaFerramentas {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .statusConteudo {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .legendaStatus {
+    width: 100%;
+  }
+
+  .cartao {
+    padding: 16px;
+  }
+}
