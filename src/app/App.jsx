@@ -3,9 +3,11 @@ import { LogOut, Menu, Moon, Sun, X } from 'lucide-react'
 import { useEstoque } from '../features/estoque/model/useEstoque.jsx'
 import { useCardapio } from '../features/cardapio/model/useCardapio.jsx'
 import { useVendas } from '../features/vendas/model/useVendas'
+import { useIndicadores } from '../features/dashboard/model/useIndicadores'
 import { ModalReceita } from '../features/vendas/ui/ModalReceita'
 import CardapioPage from '../pages/cardapioPage'
 import EstoquePage from '../pages/estoquePage'
+import IndicadoresPage from '../pages/indicadoresPage'
 import LoginPage from '../pages/loginPage'
 import VendasPage from '../pages/vendasPage'
 import styles from './app.module.css'
@@ -22,6 +24,7 @@ function App() {
     aoBaixarEstoque: estoqueModel.baixarConsumo,
     avisar: estoqueModel.avisar,
   })
+  const indicadoresModel = useIndicadores(pagina === 'indicadores')
 
   if (!estoqueModel.usuarioLogado) {
     return <LoginPage aoEntrar={estoqueModel.entrar} />
@@ -64,6 +67,12 @@ function App() {
         >
           Registrar vendas
         </button>
+        <button
+          className={pagina === 'indicadores' ? styles.itemAtivo : ''}
+          onClick={() => navegarPara('indicadores')}
+        >
+          Indicadores
+        </button>
 
         <div className={styles.perfil}>
           <span>MC</span>
@@ -102,6 +111,12 @@ function App() {
             {...vendasModel}
             estoque={estoqueModel.estoque}
             itens={cardapioModel.itens}
+          />
+        )}
+        {pagina === 'indicadores' && (
+          <IndicadoresPage
+            {...indicadoresModel}
+            tema={escuro ? 'escuro' : 'claro'}
           />
         )}
       </main>
