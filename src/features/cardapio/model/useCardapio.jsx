@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   listarItensCardapio,
-  salvarItemCardapio,
+  salvarItemCardapio
 } from '../../../entities/item-cardapio/itemCardapio.api'
 import FormularioItem from '../ui/FormularioItem'
 
@@ -42,19 +42,32 @@ export function useCardapio({ avisar }) {
     })
   }
 
-  async function salvarItem(dados) {
-    const salvo = await salvarItemCardapio(dados)
+async function salvarItem(dados) {
+  const editando = Boolean(dados.id)
 
-    setItens((lista) => {
-      if (!dados.id) {
-        return [...lista, salvo]
-      }
+  const salvo = await salvarItemCardapio(dados)
 
-      return lista.map((item) => item.id === salvo.id ? salvo : item)
-    })
-    avisar(dados.id ? 'Item atualizado.' : 'Item cadastrado.')
-    fecharPainel()
-  }
+  setItens((lista) => {
+    if (!editando) {
+      return [...lista, {
+        ...salvo,
+        receita: dados.receita
+      }]
+    }
+
+    return lista.map((item) => (
+      item.id === salvo.id
+        ? {
+            ...salvo,
+            receita: dados.receita
+          }
+        : item
+    ))
+  })
+
+  avisar(editando ? 'Item atualizado.' : 'Item cadastrado.')
+  fecharPainel()
+}
 
   return {
     itens,

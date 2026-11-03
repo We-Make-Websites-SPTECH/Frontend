@@ -14,7 +14,7 @@ function FormularioItem({ dados, estoque, aoSalvar }) {
 
   useEffect(() => {
     if (dados) {
-      setReceita(dados.receita.map((ingrediente) => ({ ...ingrediente })))
+      setReceita((dados.receita || []).map((ingrediente) => ({ ...ingrediente })))
     }
   }, [dados])
 

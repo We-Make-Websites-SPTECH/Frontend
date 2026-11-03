@@ -24,7 +24,11 @@ function LoginPage({ aoEntrar }) {
       return
     }
 
+    const usuario = await resposta.json()
+
     localStorage.setItem('usuarioLogado', 'true')
+    localStorage.setItem('usuarioId', usuario.id)
+
     aoEntrar()
   }
 
