@@ -12,8 +12,11 @@ export function useEstoque() {
   const [painel, setPainel] = useState(null)
   const [mensagem, setMensagem] = useState('')
   const [usuarioLogado, setUsuarioLogado] = useState(
-  localStorage.getItem('usuarioLogado') === 'true'
-)
+    localStorage.getItem('usuarioLogado') === 'true'
+  )
+  const [nomeUsuario, setNomeUsuario] = useState(
+    localStorage.getItem('usuarioNome') || ''
+  )
 
   useEffect(() => {
     listarInsumos().then(setEstoque)
@@ -124,14 +127,31 @@ export function useEstoque() {
     }))
   }
 
+  function sair() {
+    localStorage.removeItem('usuarioLogado')
+    localStorage.removeItem('usuarioId')
+    localStorage.removeItem('usuarioNome')
+    setNomeUsuario('')
+    setUsuarioLogado(false)
+  }
+
+  function entrar(usuario) {
+    localStorage.setItem('usuarioLogado', 'true')
+    localStorage.setItem('usuarioId', usuario.id)
+    localStorage.setItem('usuarioNome', usuario.nome)
+    setNomeUsuario(usuario.nome)
+    setUsuarioLogado(true)
+  }
+
   return {
     estoque,
     abaixoDoLimite,
     painel,
     mensagem,
     usuarioLogado,
-    entrar: () => setUsuarioLogado(true),
-    sair: () => setUsuarioLogado(false),
+    nomeUsuario,
+    entrar,
+    sair,
     fecharPainel,
     abrirNovoInsumo,
     editarInsumo,

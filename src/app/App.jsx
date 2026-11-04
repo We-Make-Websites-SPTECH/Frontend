@@ -10,7 +10,21 @@ import EstoquePage from '../pages/estoquePage'
 import IndicadoresPage from '../pages/indicadoresPage'
 import LoginPage from '../pages/loginPage'
 import VendasPage from '../pages/vendasPage'
+import { formatarNome } from '../shared/lib/formatar'
 import styles from './app.module.css'
+
+function iniciaisDoNome(nome) {
+  const partes = nome.split(' ').filter(Boolean)
+
+  if (!partes.length) {
+    return 'US'
+  }
+
+  const primeira = partes[0][0]
+  const ultima = partes.length > 1 ? partes[partes.length - 1][0] : ''
+
+  return `${primeira}${ultima}`.toUpperCase()
+}
 
 function App() {
   const [pagina, setPagina] = useState('estoque')
@@ -29,6 +43,8 @@ function App() {
   if (!estoqueModel.usuarioLogado) {
     return <LoginPage aoEntrar={estoqueModel.entrar} />
   }
+
+  const nomeExibido = formatarNome(estoqueModel.nomeUsuario) || 'Usuário'
 
   function navegarPara(novaPagina) {
     setPagina(novaPagina)
@@ -75,10 +91,9 @@ function App() {
         </button>
 
         <div className={styles.perfil}>
-          <span>MC</span>
+          <span>{iniciaisDoNome(nomeExibido)}</span>
           <div>
-            <b>Mariana Costa</b>
-            <small>Administradora</small>
+            <b>{nomeExibido}</b>
           </div>
         </div>
         <button className={styles.botaoSair} onClick={estoqueModel.sair}>

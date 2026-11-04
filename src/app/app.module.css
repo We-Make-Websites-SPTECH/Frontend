@@ -95,17 +95,11 @@
   font-weight: 700;
 }
 
-.perfil b, .perfil small {
+.perfil b {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.perfil small {
-  margin-top: 3px;
-  font-size: 11px;
-  opacity: .7;
 }
 
 .botaoSair {
@@ -211,6 +205,8 @@
   --secundario: #647b7b;
   --borda: #d1d5ca;
   --primaria: #ae2f2b;
+  --statusNormal: #27815d;
+  --statusBaixo: #c9433e;
   display: grid;
   min-height: 100vh;
   padding: 24px;
@@ -219,7 +215,10 @@
 }
 
 .cartaoLogin {
+  display: flex;
+  flex-direction: column;
   width: min(420px, 100%);
+  min-height: 620px;
   padding: 30px;
   color: var(--texto);
   background: var(--superficie);
@@ -243,7 +242,7 @@
 .campoLogin {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 5px;
   margin: 14px 0;
 }
 
@@ -262,15 +261,41 @@
   border-radius: 8px;
 }
 
-.cartaoLogin label {
+.entradaLogin {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 7px;
-  margin: 14px 0;
-  font-size: 13px;
-  font-weight: 600;
+  align-items: center;
 }
 
+.entradaLogin > svg {
+  position: absolute;
+  left: 12px;
+  color: var(--secundario);
+  pointer-events: none;
+}
+
+.entradaLogin input {
+  width: 100%;
+  padding: 10px 42px 10px 38px;
+}
+
+.mostrarSenha {
+  position: absolute;
+  right: 6px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  place-items: center;
+}
+
+.mostrarSenha:hover {
+  color: var(--texto);
+}
 
 .cartaoLogin .botaoPrimario {
   width: 100%;
@@ -281,12 +306,115 @@
   border-radius: 8px;
   font-weight: 700;
   cursor: pointer;
+  transition: filter .15s ease;
+}
+
+.cartaoLogin .botaoPrimario:hover:not(:disabled) {
+  filter: brightness(.92);
+}
+
+.cartaoLogin .botaoPrimario:disabled {
+  opacity: .7;
+  cursor: wait;
+}
+
+.abasLogin {
+  display: flex;
+  gap: 5px;
+  margin: 18px 0 4px;
+  padding: 4px;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+
+.abasLogin button {
+  flex: 1;
+  min-height: 38px;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+
+.abasLogin button:not(.abaLoginAtiva):hover {
+  color: var(--texto);
+}
+
+.abasLogin .abaLoginAtiva {
+  color: #fffdf5;
+  background: var(--primaria);
+  font-weight: 700;
+}
+
+.cartaoLogin .botaoTexto {
+  padding: 4px;
+  color: var(--secundario);
+  background: transparent;
+  border: 0;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.cartaoLogin .botaoTexto:hover {
+  color: var(--primaria);
+  text-decoration: underline;
+}
+
+.cartaoLogin .esqueciSenha {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px;
+  text-align: center;
+}
+
+.cartaoLogin .voltarLogin {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 6px;
+  text-align: center;
+}
+
+.cartaoLogin .mensagemSucesso {
+  color: var(--statusNormal);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cartaoLogin .mensagemErro {
+  color: var(--statusBaixo);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cartaoLogin .ajudaLogin {
+  margin: 0 0 16px;
+  color: var(--secundario);
+  text-align: center;
+  font-size: 13px;
 }
 
 .cartaoLogin p {
   margin: 15px 0 0;
   color: var(--secundario);
   text-align: center;
+  font-size: 11px;
+}
+
+.cartaoLogin .rodapeLogin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: auto 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--borda);
   font-size: 11px;
 }
 
@@ -320,5 +448,12 @@
 
   .barraSuperior {
     padding: 0 12px 0 64px;
+  }
+}
+
+@media (max-width: 520px) {
+  .cartaoLogin {
+    min-height: auto;
+    padding: 24px;
   }
 }
