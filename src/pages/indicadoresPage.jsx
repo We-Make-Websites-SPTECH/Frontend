@@ -52,7 +52,7 @@ function SeletorUnidade({ unidades, atual, aoSelecionar }) {
   )
 }
 
-function Indicadores({ indicadores, carregando, tema }) {
+function Indicadores({ indicadores, carregando, erro, recarregar, tema }) {
   const {
     dataInicio,
     dataFim,
@@ -165,7 +165,14 @@ function Indicadores({ indicadores, carregando, tema }) {
         </p>
       </header>
 
-      <div className={styles.grade}>
+      {erro ? (
+        <div className={styles.cartao} role="alert">
+          <p>{erro}</p>
+          <button type="button" className={styles.botaoTentar} onClick={recarregar}>Tentar novamente</button>
+        </div>
+      ) : carregando ? (
+        <div className={styles.cartao} role="status">Carregando indicadores...</div>
+      ) : <div className={styles.grade}>
         <article className={styles.cartao}>
           <div className={styles.tituloCartao}>
             <TituloCartao
@@ -297,7 +304,7 @@ function Indicadores({ indicadores, carregando, tema }) {
             </div>
           </div>
         </article>
-      </div>
+      </div>}
     </section>
   )
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { buscarIndicadores } from '../../../entities/dashboard/dashboard.api'
 
 function criarIndicadoresVazios() {
@@ -25,18 +25,24 @@ function criarIndicadoresVazios() {
 export function useIndicadores(ativo = true) {
   const [indicadores, setIndicadores] = useState(criarIndicadoresVazios)
   const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+  const ultimaRequisicao = useRef(0)
 
   const carregar = useCallback(async () => {
+    const requisicao = ++ultimaRequisicao.current
     setCarregando(true)
+    setErro('')
 
     try {
       const resposta = await buscarIndicadores()
-      setIndicadores(resposta)
+      if (requisicao === ultimaRequisicao.current) setIndicadores(resposta)
     } catch (erro) {
       console.error('Não foi possível carregar os indicadores.', erro)
-      setIndicadores(criarIndicadoresVazios())
+      if (requisicao === ultimaRequisicao.current) {
+        setErro('Não foi possível carregar os indicadores. Tente novamente.')
+      }
     } finally {
-      setCarregando(false)
+      if (requisicao === ultimaRequisicao.current) setCarregando(false)
     }
   }, [])
 
@@ -49,6 +55,7 @@ export function useIndicadores(ativo = true) {
   return {
     indicadores,
     carregando,
+    erro,
     recarregar: carregar,
   }
 }

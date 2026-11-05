@@ -3,20 +3,19 @@ import styles from '../../../pages/vendas/style.module.css'
 
 function ModalReceita({ venda, item, estoque, aoFechar, aoSalvar }) {
   const [receita, setReceita] = useState(
-    item?.receita.map((ingrediente) => ({ ...ingrediente })) || [],
+    item?.receita?.map((ingrediente) => ({ ...ingrediente })) || [],
   )
   const [quantidade, setQuantidade] = useState('1')
   const [insumoId, setInsumoId] = useState('')
   const [quantidadeIngrediente, setQuantidadeIngrediente] = useState('')
+  const [erro, setErro] = useState('')
 
   const quantidadeJaAlterada = (venda.variacoes || []).reduce(
     (soma, variacao) => soma + variacao.quantidade,
     0,
   )
   const quantidadeDisponivel = venda.quantidade - quantidadeJaAlterada
-  const insumosDisponiveis = estoque.filter((insumo) => (
-    insumo.ativo && insumo.categoria !== 'Bebidas'
-  ))
+  const insumosDisponiveis = estoque.filter((insumo) => insumo.ativo)
 
   function alterarQuantidadeIngrediente(id, valor) {
     setReceita((atual) => atual.map((ingrediente) => (
@@ -34,7 +33,8 @@ function ModalReceita({ venda, item, estoque, aoFechar, aoSalvar }) {
     const id = Number(insumoId)
     const quantidadeNova = Number(quantidadeIngrediente)
 
-    if (!id || quantidadeNova <= 0) {
+    if (!id || !Number.isFinite(quantidadeNova) || quantidadeNova <= 0 || Math.abs(quantidadeNova * 1000 - Math.round(quantidadeNova * 1000)) > 1e-7) {
+      setErro('Informe um ingrediente e uma quantidade positiva com até 3 casas decimais.')
       return
     }
 
@@ -52,6 +52,7 @@ function ModalReceita({ venda, item, estoque, aoFechar, aoSalvar }) {
       return [...atual, { insumoId: id, quantidade: quantidadeNova }]
     })
     setQuantidadeIngrediente('')
+    setErro('')
   }
 
   function aplicarAlteracao() {
@@ -62,6 +63,15 @@ function ModalReceita({ venda, item, estoque, aoFechar, aoSalvar }) {
       || quantidadeAlterada < 1
       || quantidadeAlterada > quantidadeDisponivel
     ) {
+      setErro('Informe uma quantidade válida de unidades para esta alteração.')
+      return
+    }
+
+    if (receita.some((ingrediente) => {
+      const valor = Number(ingrediente.quantidade)
+      return !Number.isFinite(valor) || valor <= 0 || Math.abs(valor * 1000 - Math.round(valor * 1000)) > 1e-7
+    })) {
+      setErro('Informe quantidades positivas com até 3 casas decimais ou remova o ingrediente.')
       return
     }
 
@@ -94,6 +104,7 @@ function ModalReceita({ venda, item, estoque, aoFechar, aoSalvar }) {
 
         <h2>Alterar ingredientes</h2>
         <p>{item?.nome} · {venda.quantidade} unidades vendidas</p>
+        {erro && <p className={styles.erro} role="alert">{erro}</p>}
 
         <label className={styles.campo} htmlFor="quantidade-com-receita-alterada">
           Unidades com esta alteração

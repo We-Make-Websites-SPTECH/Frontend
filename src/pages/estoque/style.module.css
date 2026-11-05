@@ -61,7 +61,7 @@
 
 .indicadores {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 16px;
 }
@@ -138,6 +138,17 @@
   background: transparent;
   border: 0;
   outline: 0;
+}
+
+.pesquisa:focus-within {
+  border-color: #638a8b;
+  box-shadow: 0 0 0 3px #638a8b33;
+}
+
+.pesquisa input:focus,
+.pesquisa input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .filtros {
@@ -241,6 +252,12 @@
   text-decoration: underline;
   cursor: pointer;
   font-size: 12px;
+}
+
+.acoesTabela {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .vazio {

@@ -2,15 +2,18 @@ import { useEffect, useState } from 'react'
 import { formatar } from '../../../shared/lib/formatar'
 import styles from '../../../shared/ui/formulario.module.css'
 
-const tiposItem = ['Tradicional', 'Trem', 'Beirute']
+const tiposItem = { TRADICIONAL: 'Tradicional', TREM: 'Trem', BEIRUTE: 'Beirute' }
 
 function FormularioItem({ dados, estoque, aoSalvar }) {
   const [nome, setNome] = useState(dados?.nome || '')
-  const [tipo, setTipo] = useState(dados?.tipo || 'Tradicional')
+  const [tipo, setTipo] = useState(dados?.tipo || 'TRADICIONAL')
   const [tamanho, setTamanho] = useState(dados?.tamanho || 35)
   const [receita, setReceita] = useState(dados?.receita || [])
   const [insumoId, setInsumoId] = useState('')
   const [quantidade, setQuantidade] = useState('')
+  const [erro, setErro] = useState('')
+  const [produtoPendente, setProdutoPendente] = useState(null)
+  const [enviando, setEnviando] = useState(false)
 
   useEffect(() => {
     if (dados) {
@@ -18,16 +21,16 @@ function FormularioItem({ dados, estoque, aoSalvar }) {
     }
   }, [dados])
 
-  const ingredientesDisponiveis = estoque.filter((item) => (
-    item.ativo && item.categoria !== 'Bebidas'
-  ))
+  const ingredientesDisponiveis = estoque.filter((item) => item.ativo)
 
 
   function adicionarIngrediente() {
     const id = Number(insumoId)
     const qtd = Number(quantidade)
 
-    if (!id || qtd <= 0) {
+    if (!ingredientesDisponiveis.some((item) => item.id === id) || !Number.isFinite(qtd)
+      || qtd <= 0 || Math.abs(qtd * 1000 - Math.round(qtd * 1000)) > 1e-7) {
+      setErro('Selecione um insumo ativo e informe uma quantidade positiva com até 3 casas decimais.')
       return
     }
 
@@ -45,24 +48,42 @@ function FormularioItem({ dados, estoque, aoSalvar }) {
       return [...atual, { insumoId: id, quantidade: qtd }]
     })
     setQuantidade('')
+    setErro('')
   }
 
   function removerIngrediente(insumoIdRemovido) {
     setReceita((atual) => atual.filter((ingrediente) => (
       ingrediente.insumoId !== insumoIdRemovido
     )))
+    setErro('')
   }
 
-  function enviar(evento) {
+  async function enviar(evento) {
     evento.preventDefault()
-    aoSalvar({
+
+    if (!receita.length) {
+      setErro('Adicione pelo menos um ingrediente à receita.')
+      return
+    }
+
+    if (receita.some((ingrediente) => !ingredientesDisponiveis.some((item) => item.id === ingrediente.insumoId))) {
+      setErro('Remova os ingredientes inativos antes de salvar a receita.')
+      return
+    }
+
+    setErro('')
+    setEnviando(true)
+    const pendente = await aoSalvar({
       ...dados,
       nome,
       tipo,
       tamanho: Number(tamanho),
-      ativo: true,
+      ativo: dados?.ativo !== false,
       receita,
-    })
+      receitaAnterior: dados?.receita || [],
+    }, produtoPendente)
+    if (pendente) setProdutoPendente(pendente)
+    setEnviando(false)
   }
 
   return (
@@ -72,6 +93,8 @@ function FormularioItem({ dados, estoque, aoSalvar }) {
         <input
           id="nome-item"
           required
+          maxLength={255}
+          disabled={Boolean(produtoPendente) || enviando}
           value={nome}
           onChange={(evento) => setNome(evento.target.value)}
           placeholder="Ex.: Calabresa"
@@ -82,11 +105,12 @@ function FormularioItem({ dados, estoque, aoSalvar }) {
         Tipo
         <select
           id="tipo-item"
+          disabled={Boolean(produtoPendente) || enviando}
           value={tipo}
           onChange={(evento) => setTipo(evento.target.value)}
         >
-          {tiposItem.map((opcao) => (
-            <option key={opcao} value={opcao}>{opcao}</option>
+          {Object.entries(tiposItem).map(([valor, rotulo]) => (
+            <option key={valor} value={valor}>{rotulo}</option>
           ))}
         </select>
       </label>
@@ -97,6 +121,9 @@ function FormularioItem({ dados, estoque, aoSalvar }) {
           id="tamanho-item"
           type="number"
           min="1"
+          step="1"
+          required
+          disabled={Boolean(produtoPendente) || enviando}
           value={tamanho}
           onChange={(evento) => setTamanho(evento.target.value)}
         />
@@ -120,8 +147,8 @@ function FormularioItem({ dados, estoque, aoSalvar }) {
         <input
           aria-label="Quantidade do ingrediente"
           type="number"
-          min="0.01"
-          step="any"
+          min="0.001"
+          step="0.001"
           placeholder="Qtd."
           value={quantidade}
           onChange={(evento) => setQuantidade(evento.target.value)}
@@ -141,7 +168,7 @@ function FormularioItem({ dados, estoque, aoSalvar }) {
 
           return (
             <div key={ingrediente.insumoId}>
-              <span>{insumo?.nome || 'Insumo'}</span>
+              <span>{insumo?.nome || 'Insumo'}{insumo && !insumo.ativo ? ' (inativo)' : ''}</span>
               <b>{formatar(ingrediente.quantidade)} {insumo?.unidade}</b>
               <button
                 type="button"
@@ -156,8 +183,11 @@ function FormularioItem({ dados, estoque, aoSalvar }) {
         {!receita.length && <p>Nenhum ingrediente adicionado.</p>}
       </div>
 
-      <button className={styles.botaoPrimario} type="submit">
-        Salvar item
+      {erro && <p className={styles.erro}>{erro}</p>}
+
+      {produtoPendente && <p className={styles.ajuda}>Produto salvo. Corrija a receita e tente novamente; o produto não será duplicado.</p>}
+      <button className={styles.botaoPrimario} type="submit" disabled={enviando}>
+        {enviando ? 'Salvando...' : produtoPendente ? 'Tentar salvar receita' : 'Salvar item'}
       </button>
     </form>
   )

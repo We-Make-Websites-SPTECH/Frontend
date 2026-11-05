@@ -310,3 +310,11 @@
     padding: 16px;
   }
 }
+.botaoTentar {
+  padding: 9px 14px;
+  color: var(--texto);
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  cursor: pointer;
+}

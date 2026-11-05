@@ -1,45 +1,81 @@
-export async function listarItensCardapio() {
-  const resposta = await fetch('http://localhost:8080/produto')
+import { apiFetch } from '../../shared/lib/api'
 
-  if (!resposta.ok) {
-    throw new Error('Erro ao buscar produtos')
-  }
-
-  return await resposta.json()
+function normalizarIngredientes(receita) {
+  return (receita?.ingredientes || []).map((ingrediente) => ({
+    insumoId: ingrediente.insumo.id,
+    quantidade: Number(ingrediente.quantidade),
+  }))
 }
 
-export async function salvarItemCardapio(item) {
-  const usuarioId = localStorage.getItem('usuarioId')
+export async function listarItensCardapio() {
+  const [produtos, receitas] = await Promise.all([
+    apiFetch('/produto'),
+    apiFetch('/receita'),
+  ])
+  const receitasPorProduto = new Map((receitas || []).map((receita) => [
+    receita.produto.id,
+    normalizarIngredientes(receita),
+  ]))
 
-  const url = item.id
-    ? `http://localhost:8080/produto/${item.id}`
-    : 'http://localhost:8080/produto'
+  return (produtos || []).map((produto) => ({
+    ...produto,
+    receita: receitasPorProduto.get(produto.id) || [],
+    temReceita: receitasPorProduto.has(produto.id),
+  }))
+}
 
-  const dadosProduto = item.id
-    ? {
-        nome: item.nome,
-        ativo: item.ativo,
-        tipo: item.tipo.toUpperCase(),
-        tamanho: Number(item.tamanho)
-      }
-    : {
-        nome: item.nome,
-        tipo: item.tipo.toUpperCase(),
-        tamanho: Number(item.tamanho)
-      }
+export async function salvarProduto(item) {
+  const editando = Boolean(item.id)
+  const produtos = (await apiFetch('/produto')) || []
+  const comparador = new Intl.Collator('pt-BR', { sensitivity: 'base' })
+  const duplicado = produtos.some((produto) => (
+    Number(produto.id) !== Number(item.id)
+    && Number(produto.tamanho) === Number(item.tamanho)
+    && comparador.compare(String(produto.nome).trimEnd(), String(item.nome).trimEnd()) === 0
+  ))
 
-  const resposta = await fetch(url, {
-    method: item.id ? 'PUT' : 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Usuario-Id': usuarioId
-    },
-    body: JSON.stringify(dadosProduto)
-  })
-
-  if (!resposta.ok) {
-    throw new Error('Erro ao cadastrar produto')
+  if (duplicado) {
+    throw new Error('Já existe um item cadastrado com esse nome e tamanho.')
   }
 
-  return await resposta.json()
+  return apiFetch(editando ? `/produto/${item.id}` : '/produto', {
+    method: editando ? 'PUT' : 'POST',
+    body: JSON.stringify({
+      nome: item.nome,
+      tipo: String(item.tipo).toUpperCase(),
+      tamanho: Number(item.tamanho),
+      ...(editando ? { ativo: item.ativo !== false } : {}),
+    }),
+  })
+}
+
+export async function salvarReceita(produtoId, receita, temReceita) {
+  const ingredientes = receita.map((ingrediente) => ({
+    insumoId: Number(ingrediente.insumoId),
+    quantidade: Number(ingrediente.quantidade),
+  }))
+  if (!ingredientes.length || new Set(ingredientes.map((i) => i.insumoId)).size !== ingredientes.length
+    || ingredientes.some((i) => !Number.isInteger(i.insumoId) || i.insumoId <= 0
+      || !Number.isFinite(i.quantidade) || i.quantidade <= 0
+      || Math.abs(i.quantidade * 1000 - Math.round(i.quantidade * 1000)) > 1e-7)) {
+    throw new Error('Informe ingredientes distintos e quantidades positivas com até 3 casas decimais.')
+  }
+
+  // Uma falha de rede pode ter ocorrido após o servidor gravar a receita.
+  // Consulte antes de repetir para escolher POST ou PUT com segurança.
+  if (temReceita === null) {
+    try {
+      await apiFetch(`/receita/${produtoId}`)
+      temReceita = true
+    } catch (erro) {
+      if (erro.status !== 404) throw erro
+      temReceita = false
+    }
+  }
+
+  const resposta = await apiFetch(temReceita ? `/receita/${produtoId}` : '/receita', {
+    method: temReceita ? 'PUT' : 'POST',
+    body: JSON.stringify(temReceita ? { ingredientes } : { produtoId, ingredientes }),
+  })
+  return resposta ? normalizarIngredientes(resposta) : ingredientes
 }

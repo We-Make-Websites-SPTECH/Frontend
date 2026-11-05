@@ -1,10 +1,25 @@
 import { Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { formatar } from '../shared/lib/formatar'
 import styles from './cardapio/style.module.css'
 
 const filtrosCardapio = ['Todos', 'Tradicional', 'Trem', 'Beirute']
 
-function Cardapio({ itens, abrirNovoItem, editarItem, estoque }) {
+function descreverIngredientes(item, estoque) {
+  return (item.receita || []).map((ingrediente) => {
+    const insumo = estoque.find((itemEstoque) => (
+      itemEstoque.id === ingrediente.insumoId
+    ))
+
+    return {
+      id: ingrediente.insumoId,
+      nome: insumo?.nome || `Insumo ${ingrediente.insumoId}`,
+      quantidade: `${formatar(ingrediente.quantidade)} ${insumo?.unidade || ''}`.trim(),
+    }
+  })
+}
+
+function Cardapio({ itens, abrirNovoItem, editarItem, alternarAtivo, estoque }) {
   const [pesquisa, setPesquisa] = useState('')
   const [filtro, setFiltro] = useState('Todos')
 
@@ -80,10 +95,22 @@ function Cardapio({ itens, abrirNovoItem, editarItem, estoque }) {
                     <small>Código {item.id}</small>
                   </td>
                   <td>{item.tamanho} cm</td>
-                  <td>{item.tipo}</td>
-                  <td>-</td>
+                  <td>{({ TRADICIONAL: 'Tradicional', TREM: 'Trem', BEIRUTE: 'Beirute' })[item.tipo] || item.tipo}</td>
                   <td>
-                    <span className={styles.statusNormal}>
+                    {item.receita?.length ? (
+                      <ul className={styles.ingredientes}>
+                        {descreverIngredientes(item, estoque).map((ingrediente) => (
+                          <li key={ingrediente.id}>
+                            {ingrediente.nome} · {ingrediente.quantidade}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className={styles.semReceita}>Sem receita</span>
+                    )}
+                  </td>
+                  <td>
+                    <span className={item.ativo ? styles.statusNormal : styles.statusDesativado}>
                       ● {item.ativo ? 'Ativo' : 'Desativado'}
                     </span>
                   </td>
@@ -93,6 +120,16 @@ function Cardapio({ itens, abrirNovoItem, editarItem, estoque }) {
                       onClick={() => editarItem(item, estoque)}
                     >
                       Editar
+                    </button>
+                    <button
+                      className={styles.botaoTexto}
+                      onClick={() => {
+                        if (window.confirm(`${item.ativo ? 'Desativar' : 'Reativar'} ${item.nome}?`)) {
+                          alternarAtivo(item)
+                        }
+                      }}
+                    >
+                      {item.ativo ? 'Desativar' : 'Reativar'}
                     </button>
                   </td>
                 </tr>

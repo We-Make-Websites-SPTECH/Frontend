@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  desativarInsumo as desativarInsumoApi,
   listarInsumos,
   registrarMovimentacao,
   salvarInsumo,
@@ -7,19 +8,20 @@ import {
 import FormularioInsumo from '../ui/FormularioInsumo'
 import FormularioMovimento from '../ui/FormularioMovimento'
 
-export function useEstoque() {
+export function useEstoque({ aoAtualizarIndicadores }) {
   const [estoque, setEstoque] = useState([])
   const [painel, setPainel] = useState(null)
   const [mensagem, setMensagem] = useState('')
-  const [usuarioLogado, setUsuarioLogado] = useState(
-    localStorage.getItem('usuarioLogado') === 'true'
-  )
-  const [nomeUsuario, setNomeUsuario] = useState(
-    localStorage.getItem('usuarioNome') || ''
-  )
 
   useEffect(() => {
-    listarInsumos().then(setEstoque)
+    if (!localStorage.getItem('usuarioId')) {
+      return
+    }
+
+    carregarEstoque().catch((erro) => {
+      console.error('Não foi possível carregar o estoque.', erro)
+      avisar(erro.message || 'Não foi possível carregar o estoque.')
+    })
   }, [])
 
   const abaixoDoLimite = useMemo(
@@ -71,76 +73,90 @@ export function useEstoque() {
     })
   }
 
+  async function carregarEstoque() {
+    const lista = await listarInsumos()
+    setEstoque(lista)
+    return lista
+  }
+
+  function mensagemDoServidor(erro) {
+    const generica = /^Erro \d+$/.test(erro.message || '')
+    return generica ? '' : erro.message
+  }
+
   async function salvarDadosInsumo(dados) {
-    const salvo = await salvarInsumo(dados)
-    setEstoque((lista) => {
-      if (!dados.id) {
-        return [...lista, salvo]
+    try {
+      await salvarInsumo(dados)
+      aoAtualizarIndicadores()
+      await carregarEstoque()
+      avisar(dados.id ? 'Insumo atualizado.' : 'Insumo cadastrado.')
+      fecharPainel()
+    } catch (erro) {
+      console.error('Não foi possível salvar o insumo.', erro)
+
+      const mensagens = {
+        400: 'Dados inválidos. Verifique unidade, perda (0 a 99) e quantidades.',
+        403: 'Usuário sem permissão para cadastrar insumos.',
+        409: 'Não foi possível salvar: insumo já cadastrado, unidade bloqueada após movimentação ou insumo inativo.',
       }
 
-      return lista.map((item) => {
-        if (item.id === salvo.id) {
-          return { ...item, ...salvo }
-        }
-
-        return item
-      })
-    })
-    avisar(dados.id ? 'Insumo atualizado.' : 'Insumo cadastrado.')
-    fecharPainel()
+      avisar(
+        mensagemDoServidor(erro)
+        || mensagens[erro.status]
+        || 'Não foi possível salvar o insumo.',
+      )
+    }
   }
 
   async function movimentar(dados) {
-    await registrarMovimentacao(dados)
-    const insumo = estoque.find((item) => item.id === dados.insumoId)
-    const perda = dados.tipo === 'Entrada'
-      ? Number(insumo?.perda || 0)
-      : 0
-    const quantidadeComPerda = dados.quantidade * (1 - perda / 100)
-    const valor = dados.tipo === 'Entrada'
-      ? quantidadeComPerda
-      : -dados.quantidade
+    try {
+      const resposta = await registrarMovimentacao(dados)
+      aoAtualizarIndicadores()
+      await carregarEstoque()
 
-    setEstoque((lista) => lista.map((item) => {
-      if (item.id !== dados.insumoId) {
-        return item
+      const mensagemPadrao = {
+        Entrada: 'Entrada registrada.',
+        Saída: 'Saída registrada.',
+        Ajuste: 'Ajuste registrado.',
+      }[dados.tipo] || 'Movimentação registrada.'
+
+      // O backend avisa quando a saída foi maior que o saldo disponível.
+      avisar(resposta?.aviso || mensagemPadrao)
+      fecharPainel()
+    } catch (erro) {
+      console.error('Não foi possível registrar a movimentação.', erro)
+
+      const conflito = {
+        Entrada: 'Não foi possível registrar: insumo inativo ou em conflito.',
+        Saída: 'Não há saldo disponível para registrar a saída.',
+        Ajuste: 'O novo saldo precisa ser diferente do saldo atual.',
       }
 
-      return {
-        ...item,
-        saldo: Math.max(0, item.saldo + valor),
+      const mensagens = {
+        400: 'Valor ou motivo inválido para a movimentação.',
+        403: 'Usuário sem permissão para movimentar o estoque.',
+        404: 'Insumo não encontrado.',
+        409: conflito[dados.tipo] || 'Movimentação em conflito.',
       }
-    }))
-    avisar(`${dados.tipo} registrada com sucesso.`)
-    fecharPainel()
+
+      avisar(
+        mensagemDoServidor(erro)
+        || mensagens[erro.status]
+        || 'Não foi possível registrar a movimentação.',
+      )
+    }
   }
 
-  function baixarConsumo(consumo, inverter = false) {
-    setEstoque((lista) => lista.map((item) => {
-      const quantidade = consumo[item.id] || 0
-      const fator = inverter ? 1 : -1
-
-      return {
-        ...item,
-        saldo: Math.max(0, item.saldo + quantidade * fator),
-      }
-    }))
-  }
-
-  function sair() {
-    localStorage.removeItem('usuarioLogado')
-    localStorage.removeItem('usuarioId')
-    localStorage.removeItem('usuarioNome')
-    setNomeUsuario('')
-    setUsuarioLogado(false)
-  }
-
-  function entrar(usuario) {
-    localStorage.setItem('usuarioLogado', 'true')
-    localStorage.setItem('usuarioId', usuario.id)
-    localStorage.setItem('usuarioNome', usuario.nome)
-    setNomeUsuario(usuario.nome)
-    setUsuarioLogado(true)
+  async function desativarInsumo(insumo) {
+    try {
+      await desativarInsumoApi(insumo.id)
+      aoAtualizarIndicadores()
+      await carregarEstoque()
+      avisar(`${insumo.nome} foi desativado.`)
+    } catch (erro) {
+      console.error('Não foi possível desativar o insumo.', erro)
+      avisar(erro.message || 'Não foi possível desativar o insumo.')
+    }
   }
 
   return {
@@ -148,15 +164,12 @@ export function useEstoque() {
     abaixoDoLimite,
     painel,
     mensagem,
-    usuarioLogado,
-    nomeUsuario,
-    entrar,
-    sair,
     fecharPainel,
     abrirNovoInsumo,
     editarInsumo,
     abrirMovimentacao,
-    baixarConsumo,
+    desativarInsumo,
+    carregarEstoque,
     avisar,
   }
 }

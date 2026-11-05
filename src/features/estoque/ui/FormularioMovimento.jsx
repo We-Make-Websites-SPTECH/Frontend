@@ -2,12 +2,19 @@ import { useEffect, useRef, useState } from 'react'
 import { formatar } from '../../../shared/lib/formatar'
 import styles from '../../../shared/ui/formulario.module.css'
 
-const tiposMovimento = ['Entrada', 'Saída']
+const tiposMovimento = ['Entrada', 'Saída', 'Ajuste']
+
+const motivosPorTipo = {
+  Entrada: ['Compra', 'Outro'],
+  Saída: ['Quebra', 'Outro'],
+}
 
 function FormularioMovimento({ estoque, aoSalvar }) {
   const [tipo, setTipo] = useState('Entrada')
   const [insumoId, setInsumoId] = useState('')
   const [quantidade, setQuantidade] = useState('')
+  const [novoSaldo, setNovoSaldo] = useState('')
+  const [motivo, setMotivo] = useState(motivosPorTipo.Entrada[0])
   const [justificativa, setJustificativa] = useState('')
   const [busca, setBusca] = useState('')
   const [listaAberta, setListaAberta] = useState(false)
@@ -37,6 +44,11 @@ function FormularioMovimento({ estoque, aoSalvar }) {
 
   function trocarTipo(novoTipo) {
     setTipo(novoTipo)
+
+    if (motivosPorTipo[novoTipo]) {
+      setMotivo(motivosPorTipo[novoTipo][0])
+    }
+
     setListaAberta(false)
   }
 
@@ -55,7 +67,25 @@ function FormularioMovimento({ estoque, aoSalvar }) {
   function enviar(evento) {
     evento.preventDefault()
 
-    if (!insumoId || Number(quantidade) <= 0) {
+    if (!insumoId) {
+      return
+    }
+
+    if (tipo === 'Ajuste') {
+      if (novoSaldo === '' || Number(novoSaldo) < 0) {
+        return
+      }
+
+      aoSalvar({
+        tipo,
+        insumoId: Number(insumoId),
+        novoSaldo: Number(novoSaldo),
+        justificativa,
+      })
+      return
+    }
+
+    if (Number(quantidade) <= 0) {
       return
     }
 
@@ -63,6 +93,7 @@ function FormularioMovimento({ estoque, aoSalvar }) {
       tipo,
       insumoId: Number(insumoId),
       quantidade: Number(quantidade),
+      motivo,
       justificativa,
     })
   }
@@ -118,30 +149,69 @@ function FormularioMovimento({ estoque, aoSalvar }) {
         </div>
       </div>
 
-      <label htmlFor="quantidade-movimento">
-        Quantidade
-        <input
-          id="quantidade-movimento"
-          required
-          type="number"
-          min="0.01"
-          step="any"
-          value={quantidade}
-          onChange={(evento) => setQuantidade(evento.target.value)}
-        />
-      </label>
-
-      {tipo === 'Saída' && (
-        <label htmlFor="justificativa-movimento">
-          Justificativa (opcional)
-          <textarea
-            id="justificativa-movimento"
-            value={justificativa}
-            onChange={(evento) => setJustificativa(evento.target.value)}
-            placeholder="Descreva o motivo da saída"
+      {tipo === 'Ajuste' ? (
+        <label htmlFor="saldo-movimento">
+          Novo saldo
+          <input
+            id="saldo-movimento"
+            required
+            type="number"
+            min="0"
+            step="any"
+            value={novoSaldo}
+            onChange={(evento) => setNovoSaldo(evento.target.value)}
+          />
+          {insumoSelecionado && (
+            <small>
+              Saldo atual: {formatar(insumoSelecionado.saldo)} {insumoSelecionado.unidade}.
+              O ajuste define o saldo absoluto e não aplica perda.
+            </small>
+          )}
+        </label>
+      ) : (
+        <label htmlFor="quantidade-movimento">
+          {tipo === 'Entrada' ? 'Quantidade bruta' : 'Quantidade'}
+          <input
+            id="quantidade-movimento"
+            required
+            type="number"
+            min="0.01"
+            step="any"
+            value={quantidade}
+            onChange={(evento) => setQuantidade(evento.target.value)}
           />
         </label>
       )}
+
+      {motivosPorTipo[tipo] && (
+        <label htmlFor="motivo-movimento">
+          Motivo
+          <select
+            id="motivo-movimento"
+            value={motivo}
+            onChange={(evento) => setMotivo(evento.target.value)}
+          >
+            {motivosPorTipo[tipo].map((opcao) => (
+              <option key={opcao} value={opcao}>{opcao}</option>
+            ))}
+          </select>
+        </label>
+      )}
+
+      <label htmlFor="justificativa-movimento">
+        Observação (opcional)
+        <textarea
+          id="justificativa-movimento"
+          maxLength={255}
+          value={justificativa}
+          onChange={(evento) => setJustificativa(evento.target.value)}
+          placeholder={
+            tipo === 'Ajuste'
+              ? 'Ex.: contagem de inventário'
+              : 'Descreva o motivo da movimentação'
+          }
+        />
+      </label>
 
       <button className={styles.botaoPrimario} type="submit">
         Confirmar {tipo.toLowerCase()}

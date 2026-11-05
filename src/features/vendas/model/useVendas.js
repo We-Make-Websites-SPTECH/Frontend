@@ -1,239 +1,157 @@
-import { useEffect, useMemo, useState } from 'react'
-import {
-  estornarVenda,
-  listarRegistrosVenda,
-  registrarVenda,
-} from '../../../entities/registro-venda/registroVenda.api'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { confirmarRegistro, consultarRegistro, importarTxt, listarLinhas, listarRegistrosVenda, personalizarLinha, prepararManual } from '../../../entities/registro-venda/registroVenda.api'
 
-function calcularConsumo(lista, itens) {
-  const consumo = {}
-
-  function acumularReceita(receita, quantidade) {
-    receita.forEach((ingrediente) => {
-      const atual = consumo[ingrediente.insumoId] || 0
-      consumo[ingrediente.insumoId] = atual + Number(ingrediente.quantidade) * quantidade
-    })
-  }
-
-  lista.forEach((venda) => {
-    const item = itens.find((produto) => produto.id === venda.itemId)
-    const variacoes = venda.variacoes || []
-    const quantidadeVariada = variacoes.reduce(
-      (soma, variacao) => soma + variacao.quantidade,
-      0,
-    )
-
-    if (item) {
-      acumularReceita(item.receita, venda.quantidade - quantidadeVariada)
-    }
-
-    variacoes.forEach((variacao) => {
-      acumularReceita(variacao.receita, variacao.quantidade)
-    })
-  })
-
-  return consumo
-}
-
-function acumularVenda(lista, itemId, quantidade) {
-  const vendaExistente = lista.find((venda) => venda.itemId === itemId)
-
-  if (!vendaExistente) {
-    return [...lista, { itemId, quantidade, variacoes: [] }]
-  }
-
-  return lista.map((venda) => (
-    venda.itemId === itemId
-      ? { ...venda, quantidade: venda.quantidade + quantidade }
-      : venda
-  ))
-}
-
-export function useVendas({ itens, aoBaixarEstoque, avisar }) {
-  const [registros, setRegistros] = useState([])
+export function useVendas({ itens, aoAtualizarEstoque, aoAtualizarIndicadores, ativo }) {
   const [lista, setLista] = useState([])
   const [data, setData] = useState(new Date().toLocaleDateString('en-CA'))
   const [itemId, setItemId] = useState('')
   const [quantidade, setQuantidade] = useState(1)
-  const [arquivo, setArquivo] = useState('')
-  const [erroArquivo, setErroArquivo] = useState('')
-  const [registroSelecionado, setRegistroSelecionado] = useState(null)
-  const [confirmarEstorno, setConfirmarEstorno] = useState(null)
+  const [arquivo, setArquivo] = useState(null)
+  const [registro, setRegistro] = useState(null)
+  const [linhas, setLinhas] = useState([])
+  const [variacoes, setVariacoes] = useState({})
+  const [personalizacaoIncerta, setPersonalizacaoIncerta] = useState({})
   const [itemModal, setItemModal] = useState(null)
+  const [registros, setRegistros] = useState([])
+  const [detalhes, setDetalhes] = useState(null)
+  const [erro, setErro] = useState('')
+  const [mensagemStatus, setMensagemStatus] = useState('')
+  const [ocupado, setOcupado] = useState(false)
+  const [confirmacaoIniciada, setConfirmacaoIniciada] = useState(false)
+  const [podeRepetir, setPodeRepetir] = useState(false)
+  const [resultados, setResultados] = useState([])
+  const trava = useRef(false)
+  const idsConfirmacao = useRef([])
 
-  useEffect(() => {
-    listarRegistrosVenda().then(setRegistros)
+  const carregarHistorico = useCallback(async () => {
+    const listaRegistros = await listarRegistrosVenda()
+    setRegistros(listaRegistros.filter((item) => item.status === 'CONCLUIDO'))
   }, [])
 
-  const consumo = useMemo(
-    () => calcularConsumo(lista, itens),
-    [lista, itens],
-  )
-  const itensAtivos = itens.filter((item) => item.ativo && item.receita?.length || 0)
+  useEffect(() => {
+    if (ativo) carregarHistorico().catch(() => setErro('Não foi possível carregar o histórico.'))
+  }, [ativo, carregarHistorico])
 
-  function adicionar(idSelecionado, quantidadeInformada) {
-    const id = Number(idSelecionado || itensAtivos[0]?.id)
-    const qtd = Number(quantidadeInformada)
-
-    if (!id || !Number.isInteger(qtd) || qtd <= 0) {
-      return
-    }
-
-    setLista((atual) => acumularVenda(atual, id, qtd))
-    setItemId(String(id))
+  async function executar(acao) {
+    if (trava.current) return
+    trava.current = true
+    setOcupado(true)
+    setErro('')
+    setMensagemStatus('')
+    try { await acao() } catch (falha) {
+      setErro(falha.message || 'Não foi possível concluir a operação.')
+    } finally { trava.current = false; setOcupado(false) }
   }
 
-  function converterLinhaTxt(linha, indice, linhasImportadas) {
-    const colunas = linha.split(';').map((valor) => valor.trim())
+  function adicionar() {
+    const id = Number(itemId)
+    const qtd = Number(quantidade)
+    if (!itens.some((item) => item.id === id && item.ativo && item.receita?.length) || !Number.isInteger(qtd) || qtd < 1) { setErro('Selecione um item disponível e informe uma quantidade inteira positiva.'); return }
+    if (lista.length >= 100 && !lista.some((item) => item.produtoId === id)) { setErro('O lançamento aceita até 100 itens.'); return }
+    setLista((atual) => atual.some((item) => item.produtoId === id)
+      ? atual.map((item) => item.produtoId === id ? { ...item, quantidade: item.quantidade + qtd } : item)
+      : [...atual, { produtoId: id, quantidade: qtd }])
+    setErro('')
+  }
 
-    if (indice === 0 && /^id$/i.test(colunas[0])) {
-      return
-    }
-
-    const idItem = Number(colunas[0])
-    const quantidadeVenda = Number(colunas[2])
-    const item = itensAtivos.find((produto) => (
-      produto.id === idItem
-      && produto.nome.toLowerCase() === colunas[1]?.toLowerCase()
-    ))
-
-    const linhaInvalida = colunas.length !== 3
-      || !item
-      || !Number.isInteger(quantidadeVenda)
-      || quantidadeVenda < 1
-
-    if (linhaInvalida) {
-      throw new Error(`Confira a linha ${indice + 1}: use ID; NOME; QUANTIDADE.`)
-    }
-
-    linhasImportadas.push({
-      itemId: item.id,
-      quantidade: quantidadeVenda,
-      variacoes: [],
+  function preparar() {
+    executar(async () => {
+      if (!data || (!arquivo && !lista.length)) throw new Error('Informe a data e adicione itens ou um arquivo TXT.')
+      if (arquivo) {
+        const resumo = await importarTxt(arquivo, data)
+        setRegistro(resumo)
+        setLinhas([])
+        setLinhas(await listarLinhas(resumo.id))
+      } else {
+        const previa = await prepararManual(data, lista)
+        setRegistro(previa.registro)
+        setLinhas(previa.linhas || [])
+      }
+      setVariacoes({})
+      setPersonalizacaoIncerta({})
+      setResultados([])
+      setConfirmacaoIniciada(false)
+      setPodeRepetir(false)
     })
   }
 
-  async function importarArquivo(evento) {
-    const arquivoSelecionado = evento.target.files?.[0]
-
-    if (!arquivoSelecionado) {
-      return
-    }
-
-    setErroArquivo('')
-    setArquivo(arquivoSelecionado.name)
-
-    try {
-      const texto = await arquivoSelecionado.text()
-      const linhas = texto.split(/\r?\n/).filter((linha) => linha.trim())
-      const importadas = []
-
-      linhas.forEach((linha, indice) => {
-        converterLinhaTxt(linha, indice, importadas)
-      })
-
-      if (!importadas.length) {
-        throw new Error('O arquivo não possui itens válidos.')
+  function atualizarVariacoes(linhaId, grupos) {
+    executar(async () => {
+      let linha
+      try {
+        linha = await personalizarLinha(registro, linhaId, grupos.map((grupo) => ({
+          unidades: grupo.quantidade,
+          ingredientes: grupo.receita.map((ingrediente) => ({ insumoId: ingrediente.insumoId, quantidade: Number(ingrediente.quantidade) })),
+        })))
+      } catch (falha) {
+        if (falha.status === 0) {
+          setItemModal(null)
+          setVariacoes((atuais) => ({ ...atuais, [linhaId]: grupos }))
+          setPersonalizacaoIncerta((atuais) => ({ ...atuais, [linhaId]: true }))
+          throw new Error('Não foi possível confirmar a alteração. Atualize o status e reaplique ou remova a alteração antes de confirmar.')
+        }
+        throw falha
       }
-
-      const listaAgrupada = importadas.reduce((atual, venda) => (
-        acumularVenda(atual, venda.itemId, venda.quantidade)
-      ), [])
-
-      setLista(listaAgrupada)
-    } catch (erro) {
-      setErroArquivo(erro.message || 'Não foi possível ler o arquivo.')
-    }
-
-    evento.target.value = ''
-  }
-
-  async function confirmar() {
-    if (!lista.length || !data) {
-      return
-    }
-
-    const registro = await registrarVenda({
-      data,
-      itens: lista,
-      consumo,
-      status: 'Concluída',
+      setLinhas((atuais) => atuais.map((atual) => atual.id === linhaId ? linha : atual))
+      setVariacoes((atuais) => ({ ...atuais, [linhaId]: grupos }))
+      setPersonalizacaoIncerta((atuais) => ({ ...atuais, [linhaId]: false }))
+      setItemModal(null)
     })
-
-    aoBaixarEstoque(consumo)
-    setRegistros((atuais) => [registro, ...atuais])
-    setLista([])
-    setArquivo('')
-    avisar('Vendas registradas e estoque atualizado.')
   }
 
-  async function estornar(registro) {
-    const salvo = await estornarVenda(registro.id)
-
-    if (!salvo) {
-      return
-    }
-
-    aoBaixarEstoque(registro.consumo, true)
-    setRegistros((atuais) => atuais.map((item) => (
-      item.id === registro.id ? salvo : item
-    )))
-    avisar('Registro estornado e estoque restaurado.')
-  }
-
-  function salvarVariacao(variacao) {
-    setLista((atual) => atual.map((venda, indice) => {
-      if (indice !== itemModal) {
-        return venda
+  function confirmar() {
+    executar(async () => {
+      if (!confirmacaoIniciada) {
+        idsConfirmacao.current = linhas.filter((linha) => linha.status === 'PENDENTE').map((linha) => linha.id)
       }
-
-      return {
-        ...venda,
-        variacoes: [...(venda.variacoes || []), variacao],
+      if (!idsConfirmacao.current.length) throw new Error('Não há linhas pendentes para confirmar.')
+      setConfirmacaoIniciada(true)
+      setPodeRepetir(false)
+      let resposta
+      try {
+        resposta = await confirmarRegistro(registro, idsConfirmacao.current)
+        setResultados(resposta || [])
+      } catch (falha) {
+        try {
+          const [resumo, atualizadas] = await Promise.all([consultarRegistro(registro.id), listarLinhas(registro.id)])
+          setRegistro(resumo); setLinhas(atualizadas)
+          setPodeRepetir(resumo.status === 'PREVIA')
+          await Promise.allSettled([aoAtualizarEstoque(), aoAtualizarIndicadores(), carregarHistorico()])
+          if (resumo.status === 'CONCLUIDO') return
+        } catch { /* Mantém o mesmo ID para consulta ou nova tentativa. */ }
+        throw new Error(`Não foi possível confirmar o registro #${registro.id}. Atualize o status antes de tentar novamente: ${falha.message}`)
       }
-    }))
-    setItemModal(null)
+      await Promise.allSettled([aoAtualizarEstoque(), aoAtualizarIndicadores(), carregarHistorico()])
+      const atualizadas = await listarLinhas(registro.id)
+      setLinhas(atualizadas)
+      setRegistro(await consultarRegistro(registro.id))
+      await Promise.allSettled([aoAtualizarEstoque(), aoAtualizarIndicadores(), carregarHistorico()])
+    })
   }
 
-  function removerVariacao(itemIndice, variacaoIndice) {
-  setLista((atual) => atual.map((venda, indice) => {
-    if (indice !== itemIndice) {
-      return venda
-    }
-
-    return {
-      ...venda,
-      variacoes: venda.variacoes.filter((_, posicao) => (
-        posicao !== variacaoIndice
-      )),
-    }
-  }))
-}
-
-  return {
-    registros,
-    lista,
-    setLista,
-    data,
-    setData,
-    itemId,
-    setItemId,
-    quantidade,
-    setQuantidade,
-    consumo,
-    arquivo,
-    erroArquivo,
-    registroSelecionado,
-    setRegistroSelecionado,
-    confirmarEstorno,
-    setConfirmarEstorno,
-    itemModal,
-    setItemModal,
-    importarArquivo,
-    adicionar,
-    confirmar,
-    estornar,
-    salvarVariacao,
-    removerVariacao,
+  function consultarAtual() {
+    executar(async () => {
+      const [resumo, atualizadas] = await Promise.all([consultarRegistro(registro.id), listarLinhas(registro.id)])
+      setRegistro(resumo); setLinhas(atualizadas)
+      setPodeRepetir(confirmacaoIniciada && resumo.status === 'PREVIA')
+      if (confirmacaoIniciada) await Promise.allSettled([aoAtualizarEstoque(), aoAtualizarIndicadores(), carregarHistorico()])
+      setMensagemStatus('Status e itens atualizados.')
+    })
   }
+
+  function novo() {
+    setRegistro(null); setLinhas([]); setVariacoes({}); setPersonalizacaoIncerta({}); setLista([]); setArquivo(null)
+    setResultados([]); setConfirmacaoIniciada(false); setPodeRepetir(false); idsConfirmacao.current = []; setErro(''); setMensagemStatus('')
+  }
+
+  function verDetalhes(resumo) {
+    executar(async () => setDetalhes({ ...resumo, linhas: await listarLinhas(resumo.id) }))
+  }
+
+  function atualizarHistorico() { executar(carregarHistorico) }
+
+  return { lista, setLista, data, setData, itemId, setItemId, quantidade, setQuantidade, arquivo, setArquivo, personalizacaoIncerta,
+    registro, linhas, variacoes, itemModal, setItemModal, registros, detalhes, setDetalhes, erro, ocupado, mensagemStatus,
+    confirmacaoIniciada, podeRepetir, resultados, adicionar, preparar, confirmar, consultarAtual, novo, verDetalhes,
+    atualizarVariacoes, atualizarHistorico }
 }
