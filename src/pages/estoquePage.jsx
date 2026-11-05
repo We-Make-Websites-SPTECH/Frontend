@@ -1,6 +1,7 @@
 import { ArrowRightLeft, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { formatar } from '../shared/lib/formatar'
+import { unidadeDaApi } from '../shared/lib/unidades'
 import styles from './estoque/style.module.css'
 
 const filtrosEstoque = [
@@ -10,9 +11,28 @@ const filtrosEstoque = [
   'Desativados',
 ]
 
-function Estoque({ estoque, abaixoDoLimite, abrirMovimentacao, abrirNovoInsumo, editarInsumo }) {
+function Estoque({
+  estoque,
+  abaixoDoLimite,
+  indicadores,
+  carregandoIndicadores,
+  erroIndicadores,
+  recarregarIndicadores,
+  abrirMovimentacao,
+  abrirNovoInsumo,
+  editarInsumo,
+  desativarInsumo,
+}) {
   const [pesquisa, setPesquisa] = useState('')
   const [filtro, setFiltro] = useState('Todos')
+
+  const maisConsumidos = Object.values((indicadores?.insumosMaisConsumidos || []).reduce((grupos, item) => {
+    const unidade = unidadeDaApi(item.unidadeMedida)
+    if (!grupos[unidade] || Number(item.quantidadeConsumida) > Number(grupos[unidade].quantidadeConsumida)) {
+      grupos[unidade] = item
+    }
+    return grupos
+  }, {}))
 
   const insumosFiltrados = useMemo(() => (
     estoque
@@ -52,7 +72,7 @@ function Estoque({ estoque, abaixoDoLimite, abrirMovimentacao, abrirNovoInsumo, 
         <div className={styles.acoesCabecalho}>
           <button className={styles.botaoSecundario} onClick={abrirMovimentacao}>
             <ArrowRightLeft size={17} />
-            Entrada / saída
+            Movimentar estoque
           </button>
           <button className={styles.botaoPrimario} onClick={abrirNovoInsumo}>
             <Plus size={17} />
@@ -68,14 +88,30 @@ function Estoque({ estoque, abaixoDoLimite, abrirMovimentacao, abrirNovoInsumo, 
           <span>precisam de atenção</span>
         </div>
         <div>
-          <small>Mais saídas</small>
-          <strong>Calabresa · 1.240 g</strong>
-          <span>no período demonstrativo</span>
-        </div>
-        <div>
-          <small>Item mais vendido</small>
-          <strong>Calabresa · 35 cm</strong>
-          <span>28 unidades vendidas</span>
+          <small>Mais consumido por unidade</small>
+          {erroIndicadores ? (
+            <>
+              <strong>Indicador indisponível</strong>
+              <button type="button" className={styles.botaoTexto} onClick={recarregarIndicadores}>Tentar novamente</button>
+            </>
+          ) : carregandoIndicadores ? (
+            <>
+              <strong>Carregando...</strong>
+              <span>consultando indicadores</span>
+            </>
+          ) : maisConsumidos.length ? (
+            <>
+              {maisConsumidos.map((item) => <strong key={item.unidadeMedida}>
+                {item.nome} · {formatar(item.quantidadeConsumida)} {unidadeDaApi(item.unidadeMedida)}
+              </strong>)}
+              <span>nos últimos 30 dias</span>
+            </>
+          ) : (
+            <>
+              <strong>Sem consumo</strong>
+              <span>nenhum consumo registrado no período</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -134,7 +170,6 @@ function Estoque({ estoque, abaixoDoLimite, abrirMovimentacao, abrirNovoInsumo, 
                   <tr key={item.id}>
                     <td>
                       <b>{item.nome}</b>
-                      <small>{item.categoria}</small>
                     </td>
                     <td>{item.unidade}</td>
                     <td>
@@ -148,12 +183,28 @@ function Estoque({ estoque, abaixoDoLimite, abrirMovimentacao, abrirNovoInsumo, 
                       <span className={status.classe}>● {status.texto}</span>
                     </td>
                     <td>
-                      <button
-                        className={styles.botaoTexto}
-                        onClick={() => editarInsumo(item)}
-                      >
-                        Editar dados
-                      </button>
+                      <div className={styles.acoesTabela}>
+                        {item.ativo && (
+                          <button
+                            className={styles.botaoTexto}
+                            onClick={() => editarInsumo(item)}
+                          >
+                            Editar dados
+                          </button>
+                        )}
+                        {item.ativo && (
+                          <button
+                            className={styles.botaoTexto}
+                            onClick={() => {
+                              if (window.confirm(`Desativar ${item.nome}?`)) {
+                                desativarInsumo(item)
+                              }
+                            }}
+                          >
+                            Desativar
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )

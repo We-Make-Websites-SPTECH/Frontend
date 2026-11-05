@@ -100,6 +100,17 @@
   outline: 0;
 }
 
+.pesquisa:focus-within {
+  border-color: #638a8b;
+  box-shadow: 0 0 0 3px #638a8b33;
+}
+
+.pesquisa input:focus,
+.pesquisa input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 .filtros {
   display: flex;
   flex-wrap: wrap;
@@ -160,10 +171,34 @@
   font-size: 11px;
 }
 
-.statusNormal {
-  color: var(--statusNormal, #27815d);
+.statusNormal, .statusDesativado {
   font-size: 12px;
   font-weight: 600;
+}
+
+.statusDesativado {
+  color: var(--secundario);
+}
+
+.ingredientes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: normal;
+}
+
+.ingredientes li {
+  color: var(--secundario);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.semReceita {
+  color: var(--secundario);
+  font-size: 12px;
 }
 
 .botaoTexto {

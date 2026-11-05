@@ -26,25 +26,60 @@ function iniciaisDoNome(nome) {
   return `${primeira}${ultima}`.toUpperCase()
 }
 
+function lerUsuarioSalvo() {
+  const logado = localStorage.getItem('usuarioLogado') === 'true'
+  const id = Number(localStorage.getItem('usuarioId'))
+  const nome = localStorage.getItem('usuarioNome') || ''
+
+  if (!logado || !Number.isInteger(id) || id <= 0) {
+    return null
+  }
+
+  return { id, nome }
+}
+
 function App() {
+  const [usuario, setUsuario] = useState(lerUsuarioSalvo)
+
+  function entrar(dados) {
+    localStorage.setItem('usuarioLogado', 'true')
+    localStorage.setItem('usuarioId', dados.id)
+    localStorage.setItem('usuarioNome', dados.nome)
+    setUsuario({ id: dados.id, nome: dados.nome })
+  }
+
+  function sair() {
+    localStorage.removeItem('usuarioLogado')
+    localStorage.removeItem('usuarioId')
+    localStorage.removeItem('usuarioNome')
+    setUsuario(null)
+  }
+
+  if (!usuario) {
+    return <LoginPage aoEntrar={entrar} />
+  }
+
+  return <Painel usuario={usuario} aoSair={sair} />
+}
+
+function Painel({ usuario, aoSair }) {
   const [pagina, setPagina] = useState('estoque')
   const [escuro, setEscuro] = useState(false)
   const [menuAberto, setMenuAberto] = useState(false)
 
-  const estoqueModel = useEstoque()
+  const indicadoresModel = useIndicadores(
+    pagina === 'indicadores' || pagina === 'estoque',
+  )
+  const estoqueModel = useEstoque({ aoAtualizarIndicadores: indicadoresModel.recarregar })
   const cardapioModel = useCardapio({ avisar: estoqueModel.avisar })
   const vendasModel = useVendas({
     itens: cardapioModel.itens,
-    aoBaixarEstoque: estoqueModel.baixarConsumo,
-    avisar: estoqueModel.avisar,
+    aoAtualizarEstoque: estoqueModel.carregarEstoque,
+    aoAtualizarIndicadores: indicadoresModel.recarregar,
+    ativo: pagina === 'vendas',
   })
-  const indicadoresModel = useIndicadores(pagina === 'indicadores')
 
-  if (!estoqueModel.usuarioLogado) {
-    return <LoginPage aoEntrar={estoqueModel.entrar} />
-  }
-
-  const nomeExibido = formatarNome(estoqueModel.nomeUsuario) || 'Usuário'
+  const nomeExibido = formatarNome(usuario.nome) || 'Usuário'
 
   function navegarPara(novaPagina) {
     setPagina(novaPagina)
@@ -96,7 +131,7 @@ function App() {
             <b>{nomeExibido}</b>
           </div>
         </div>
-        <button className={styles.botaoSair} onClick={estoqueModel.sair}>
+        <button className={styles.botaoSair} onClick={aoSair}>
           <LogOut size={18} />
           Sair
         </button>
@@ -114,7 +149,15 @@ function App() {
           </button>
         </header>
 
-        {pagina === 'estoque' && <EstoquePage {...estoqueModel} />}
+        {pagina === 'estoque' && (
+          <EstoquePage
+            {...estoqueModel}
+            indicadores={indicadoresModel.indicadores}
+            carregandoIndicadores={indicadoresModel.carregando}
+            erroIndicadores={indicadoresModel.erro}
+            recarregarIndicadores={indicadoresModel.recarregar}
+          />
+        )}
         {pagina === 'cardapio' && (
           <CardapioPage
             {...cardapioModel}
@@ -149,15 +192,21 @@ function App() {
         />
       )}
 
-      {vendasModel.itemModal !== null && (
+      {vendasModel.itemModal !== null && vendasModel.linhas.some((linha) => linha.id === vendasModel.itemModal) && (
         <ModalReceita
-          venda={vendasModel.lista[vendasModel.itemModal]}
+          venda={{
+            ...vendasModel.linhas.find((linha) => linha.id === vendasModel.itemModal),
+            variacoes: vendasModel.variacoes[vendasModel.itemModal] || [],
+          }}
           item={cardapioModel.itens.find((item) => (
-            item.id === vendasModel.lista[vendasModel.itemModal]?.itemId
+            item.id === vendasModel.linhas.find((linha) => linha.id === vendasModel.itemModal)?.produtoId
           ))}
           estoque={estoqueModel.estoque}
           aoFechar={() => vendasModel.setItemModal(null)}
-          aoSalvar={vendasModel.salvarVariacao}
+          aoSalvar={(variacao) => vendasModel.atualizarVariacoes(
+            vendasModel.itemModal,
+            [...(vendasModel.variacoes[vendasModel.itemModal] || []), variacao],
+          )}
         />
       )}
 

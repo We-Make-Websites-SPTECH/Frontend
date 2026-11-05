@@ -23,47 +23,40 @@ function LoginPage({ aoEntrar }) {
       <section className={styles.cartaoLogin}>
         <div className={styles.logoLogin}>Primarella</div>
 
-        {tela !== 'recuperar' && (
-          <div
-            className={styles.abasLogin}
-            role="tablist"
-            aria-label="Acesso à conta"
+        <div
+          className={styles.abasLogin}
+          role="tablist"
+          aria-label="Acesso à conta"
+        >
+          <button
+            className={tela === 'login' ? styles.abaLoginAtiva : ''}
+            type="button"
+            role="tab"
+            aria-selected={tela === 'login'}
+            onClick={() => trocarTela('login')}
           >
-            <button
-              className={tela === 'login' ? styles.abaLoginAtiva : ''}
-              type="button"
-              role="tab"
-              aria-selected={tela === 'login'}
-              onClick={() => trocarTela('login')}
-            >
-              Login
-            </button>
-            <button
-              className={tela === 'cadastro' ? styles.abaLoginAtiva : ''}
-              type="button"
-              role="tab"
-              aria-selected={tela === 'cadastro'}
-              onClick={() => trocarTela('cadastro')}
-            >
-              Cadastro
-            </button>
-          </div>
-        )}
+            Login
+          </button>
+          <button
+            className={tela === 'cadastro' ? styles.abaLoginAtiva : ''}
+            type="button"
+            role="tab"
+            aria-selected={tela === 'cadastro'}
+            onClick={() => trocarTela('cadastro')}
+          >
+            Cadastro
+          </button>
+        </div>
 
         {tela === 'login' && (
           <FormularioLogin
             mensagem={mensagem}
             aoEntrar={aoEntrar}
-            aoRecuperarSenha={() => setTela('recuperar')}
           />
         )}
 
         {tela === 'cadastro' && (
           <FormularioCadastro aoVoltar={voltarParaLogin} />
-        )}
-
-        {tela === 'recuperar' && (
-          <FormularioRecuperacao aoVoltar={voltarParaLogin} />
         )}
 
         <p className={styles.rodapeLogin}>
@@ -87,7 +80,7 @@ function CampoLogin({ id, label, icone: Icone, children }) {
   )
 }
 
-function FormularioLogin({ mensagem, aoEntrar, aoRecuperarSenha }) {
+function FormularioLogin({ mensagem, aoEntrar }) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [senhaVisivel, setSenhaVisivel] = useState(false)
@@ -174,14 +167,6 @@ function FormularioLogin({ mensagem, aoEntrar, aoRecuperarSenha }) {
 
       <button className={styles.botaoPrimario} type="submit" disabled={enviando}>
         {enviando ? 'Entrando...' : 'Entrar'}
-      </button>
-
-      <button
-        className={`${styles.botaoTexto} ${styles.esqueciSenha}`}
-        type="button"
-        onClick={aoRecuperarSenha}
-      >
-        Esqueci minha senha
       </button>
     </form>
   )
@@ -327,67 +312,6 @@ function FormularioCadastro({ aoVoltar }) {
 
       <button className={styles.botaoPrimario} type="submit" disabled={enviando}>
         {enviando ? 'Cadastrando...' : 'Cadastrar'}
-      </button>
-    </form>
-  )
-}
-
-function FormularioRecuperacao({ aoVoltar }) {
-  const [email, setEmail] = useState('')
-  const [instrucoesEnviadas, setInstrucoesEnviadas] = useState(false)
-
-  function enviar(evento) {
-    evento.preventDefault()
-    setInstrucoesEnviadas(true)
-  }
-
-  if (instrucoesEnviadas) {
-    return (
-      <div>
-        <h1>Recuperar senha</h1>
-        <p className={styles.mensagemSucesso}>
-          Se o e-mail existir, enviaremos as instruções de recuperação.
-        </p>
-        <button
-          className={`${styles.botaoTexto} ${styles.voltarLogin}`}
-          type="button"
-          onClick={() => aoVoltar()}
-        >
-          Voltar para o login
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <form onSubmit={enviar}>
-      <h1>Recuperar senha</h1>
-      <p className={styles.ajudaLogin}>
-        Informe o e-mail cadastrado para receber as instruções.
-      </p>
-
-      <CampoLogin id="email-recuperacao" label="E-mail" icone={Mail}>
-        <input
-          id="email-recuperacao"
-          type="email"
-          placeholder="seu@email.com"
-          autoComplete="email"
-          value={email}
-          onChange={(evento) => setEmail(evento.target.value)}
-          required
-        />
-      </CampoLogin>
-
-      <button className={styles.botaoPrimario} type="submit">
-        Enviar instruções
-      </button>
-
-      <button
-        className={`${styles.botaoTexto} ${styles.voltarLogin}`}
-        type="button"
-        onClick={() => aoVoltar()}
-      >
-        Voltar para o login
       </button>
     </form>
   )

@@ -210,3 +210,13 @@
   color: var(--secundario);
   font-size: 12px;
 }
+
+.erro {
+  margin: 0;
+  padding: 10px 12px;
+  color: var(--primaria, #a12b2b);
+  background: #d65d5614;
+  border: 1px solid #d65d5666;
+  border-radius: 8px;
+  font-size: 12px;
+}
