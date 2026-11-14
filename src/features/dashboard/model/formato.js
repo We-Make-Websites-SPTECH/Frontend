@@ -173,10 +173,10 @@ export function lerCores(elemento) {
   }
 
   return {
-    verde: ler('--statusNormal', '#27815d'),
-    vermelho: ler('--primaria', '#ae2f2b'),
+    serieA: ler('--graficoA', '#2b6cb0'),
+    serieB: ler('--graficoB', '#b85c1c'),
     texto: ler('--texto', '#104547'),
-    secundario: ler('--secundario', '#647b7b'),
+    secundario: ler('--secundario', '#5a7070'),
     grade: ler('--borda', '#d1d5ca'),
     fundo: ler('--fundo', '#f0eee4'),
   }

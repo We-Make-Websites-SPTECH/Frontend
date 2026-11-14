@@ -9,7 +9,7 @@
 }
 
 .cabecalhoPagina small {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .08em;
 }
@@ -37,7 +37,7 @@
   padding: 20px;
   background: var(--superficie);
   border: 1px solid var(--borda);
-  border-radius: 11px;
+  border-radius: var(--raio-lg);
 }
 
 .tituloCartao {
@@ -72,8 +72,8 @@
   padding: 9px 11px;
   color: var(--texto);
   background: var(--fundo);
-  border: 1px solid var(--borda);
-  border-radius: 8px;
+  border: 1px solid var(--bordaControle);
+  border-radius: var(--raio-md);
 }
 
 .adicionarVenda {
@@ -97,8 +97,8 @@
   max-height: 200px;
   overflow-y: auto;
   background: var(--superficie);
-  border: 1px solid var(--borda);
-  border-radius: 8px;
+  border: 1px solid var(--bordaControle);
+  border-radius: var(--raio-md);
   box-shadow: 0 8px 20px #0002;
 }
 
@@ -135,7 +135,7 @@
   gap: 12px;
   padding: 13px 15px;
   background: var(--fundo);
-  border-radius: 8px;
+  border-radius: var(--raio-md);
 }
 
 .cabecalhoPrevia strong, .cabecalhoPrevia span,
@@ -172,7 +172,7 @@
   background: var(--fundo);
   border: 1px solid var(--borda);
   border-left: 3px solid var(--primaria);
-  border-radius: 7px;
+  border-radius: var(--raio-sm);
 }
 
 .itensPrevia:empty { display: none; }
@@ -199,7 +199,7 @@
   padding: 10px 12px;
   background: var(--fundo);
   border: 1px solid var(--borda);
-  border-radius: 7px;
+  border-radius: var(--raio-sm);
 }
 .itensAdicionados li + li, .listaHistorico li + li { margin-top: 8px; }
 .itensAdicionados .itensAdicionadosVazio {
@@ -238,8 +238,8 @@
   color: var(--texto);
   background: var(--fundo);
   border: 1px solid var(--borda);
-  border-radius: 20px;
-  font-size: 11px;
+  border-radius: var(--raio-pilula);
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -252,7 +252,7 @@
   color: var(--texto);
   background: var(--fundo);
   border-left: 3px solid var(--statusBaixo, #c9433e);
-  border-radius: 4px;
+  border-radius: var(--raio-xs);
   font-size: 12px;
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -267,7 +267,7 @@
   margin-top: 10px;
   padding: 7px 10px;
   background: var(--fundo);
-  border-radius: 6px;
+  border-radius: var(--raio-sm);
   font-size: 12px;
 }
 
@@ -291,29 +291,12 @@
 
 .ingredientePrevia b { color: var(--texto); }
 
-.botaoPrimario, .botaoSecundario {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 9px 14px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 .botaoPrimario {
-  color: #fffdf5;
-  background: var(--primaria);
-  border: 1px solid var(--primaria);
+  composes: primario from '../../shared/ui/botoes.module.css';
 }
 
 .botaoSecundario {
-  color: var(--texto);
-  background: var(--superficie);
-  border: 1px solid var(--borda);
+  composes: secundario from '../../shared/ui/botoes.module.css';
 }
 
 .botaoPrimario:disabled, .botaoSecundario:disabled {
@@ -337,7 +320,7 @@
   color: var(--secundario);
   text-align: left;
   border-bottom: 1px solid var(--borda);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: .05em;
   white-space: nowrap;
 }
@@ -356,7 +339,7 @@
 .tabelaResponsiva td small {
   margin-top: 4px;
   color: var(--secundario);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .botaoTexto {
@@ -399,7 +382,7 @@
   padding: 12px;
   color: var(--secundario);
   background: var(--fundo);
-  border-radius: 8px;
+  border-radius: var(--raio-md);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -455,8 +438,8 @@
   padding: 13px;
   color: var(--texto);
   background: var(--fundo);
-  border: 1px dashed var(--borda);
-  border-radius: 9px;
+  border: 1px dashed var(--bordaControle);
+  border-radius: var(--raio-md);
   cursor: pointer;
 }
 
@@ -468,7 +451,7 @@
 
 .arquivoTxt small {
   color: var(--secundario);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .arquivoTxt input {
@@ -484,12 +467,12 @@
   color: var(--texto);
   background: var(--fundo);
   border: 1px solid var(--borda);
-  border-radius: 8px;
+  border-radius: var(--raio-md);
 }
 
 .arquivoSelecionado > div { flex: 1; min-width: 0; }
 .arquivoSelecionado small, .arquivoSelecionado strong { display: block; }
-.arquivoSelecionado small { margin-bottom: 3px; color: var(--secundario); font-size: 11px; }
+.arquivoSelecionado small { margin-bottom: 3px; color: var(--secundario); font-size: 12px; }
 .arquivoSelecionado strong { overflow-wrap: anywhere; font-size: 12px; }
 .arquivoSelecionado button {
   display: inline-flex;
@@ -565,7 +548,7 @@
   padding: 4px 7px;
   color: var(--texto);
   background: var(--fundo);
-  border-radius: 5px;
+  border-radius: var(--raio-sm);
 }
 
 .badgeVariacao button {
@@ -597,7 +580,7 @@
   color: var(--texto);
   background: var(--superficie);
   border: 1px solid var(--borda);
-  border-radius: 12px;
+  border-radius: var(--raio-lg);
 }
 
 .modalDetalhes {
@@ -618,12 +601,12 @@
 
 .cabecalhoDetalhes > small {
   color: var(--secundario);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .08em;
 }
 
-.cabecalhoDetalhes h2 { margin: 6px 35px 12px 0; }
+.cabecalhoDetalhes h2 { margin: 6px 52px 12px 0; }
 
 .resumoDetalhes {
   display: flex;
@@ -650,7 +633,7 @@
 }
 
 .modal h2 {
-  margin: 0 35px 8px 0;
+  margin: 0 52px 8px 0;
   font-size: 21px;
 }
 
@@ -666,10 +649,10 @@
 
 .fecharModal {
   position: absolute;
-  top: 12px;
-  right: 13px;
-  width: 34px;
-  height: 34px;
+  top: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
   color: var(--texto);
   background: transparent;
   border: 0;
@@ -691,7 +674,7 @@
   align-items: center;
   padding: 8px;
   background: var(--fundo);
-  border-radius: 7px;
+  border-radius: var(--raio-sm);
   font-size: 12px;
 }
 
@@ -702,8 +685,8 @@
   padding: 8px;
   color: var(--texto);
   background: var(--fundo);
-  border: 1px solid var(--borda);
-  border-radius: 7px;
+  border: 1px solid var(--bordaControle);
+  border-radius: var(--raio-sm);
 }
 
 .listaIngredientes button {
@@ -711,9 +694,9 @@
   color: #fff;
   background: #a42c28;
   border: 1px solid #a42c28;
-  border-radius: 6px;
+  border-radius: var(--raio-sm);
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 

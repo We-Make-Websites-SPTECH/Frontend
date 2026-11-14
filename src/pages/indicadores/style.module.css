@@ -9,7 +9,7 @@
 }
 
 .cabecalhoPagina small {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .08em;
 }
@@ -40,7 +40,7 @@
   padding: 20px;
   background: var(--superficie);
   border: 1px solid var(--borda);
-  border-radius: 11px;
+  border-radius: var(--raio-lg);
 }
 
 .tituloCartao {
@@ -70,7 +70,7 @@
   flex: 0 0 auto;
   color: var(--primaria);
   background: var(--fundo);
-  border-radius: 8px;
+  border-radius: var(--raio-md);
   place-items: center;
 }
 
@@ -89,7 +89,7 @@
 .resumos small {
   display: block;
   color: var(--secundario);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -102,12 +102,12 @@
   font-variant-numeric: tabular-nums;
 }
 
-.verde {
-  color: var(--statusNormal);
+.entrada {
+  color: var(--graficoA);
 }
 
-.vermelho {
-  color: var(--primaria);
+.saida {
+  color: var(--graficoB);
 }
 
 .semValor {
@@ -151,12 +151,12 @@
   border-radius: 50%;
 }
 
-.pontoVerde {
-  background: var(--statusNormal);
+.pontoA {
+  background: var(--graficoA);
 }
 
-.pontoVermelho {
-  background: var(--primaria);
+.pontoB {
+  background: var(--graficoB);
 }
 
 .seletorUnidade {
@@ -165,17 +165,18 @@
   gap: 3px;
   padding: 3px;
   background: var(--fundo);
-  border: 1px solid var(--borda);
-  border-radius: 7px;
+  border: 1px solid var(--bordaControle);
+  border-radius: var(--raio-sm);
 }
 
 .seletorUnidade button {
-  padding: 4px 9px;
+  min-height: 32px;
+  padding: 6px 10px;
   color: var(--secundario);
   background: transparent;
   border: 0;
-  border-radius: 5px;
-  font-size: 11px;
+  border-radius: var(--raio-sm);
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -311,10 +312,5 @@
   }
 }
 .botaoTentar {
-  padding: 9px 14px;
-  color: var(--texto);
-  background: var(--superficie);
-  border: 1px solid var(--borda);
-  border-radius: 8px;
-  cursor: pointer;
+  composes: secundario from '../../shared/ui/botoes.module.css';
 }

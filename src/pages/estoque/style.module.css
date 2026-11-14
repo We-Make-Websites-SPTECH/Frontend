@@ -13,7 +13,7 @@
 }
 
 .cabecalhoPagina small {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .08em;
 }
@@ -34,29 +34,12 @@
   gap: 9px;
 }
 
-.botaoPrimario, .botaoSecundario {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 43px;
-  padding: 10px 15px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 .botaoPrimario {
-  color: #fffdf5;
-  background: var(--primaria);
-  border: 1px solid var(--primaria);
+  composes: primario from '../../shared/ui/botoes.module.css';
 }
 
 .botaoSecundario {
-  color: var(--texto);
-  background: var(--superficie);
-  border: 1px solid var(--borda);
+  composes: secundario from '../../shared/ui/botoes.module.css';
 }
 
 .indicadores {
@@ -69,7 +52,7 @@
 .indicadores > div, .cartao {
   background: var(--superficie);
   border: 1px solid var(--borda);
-  border-radius: 11px;
+  border-radius: var(--raio-lg);
 }
 
 .indicadores > div {
@@ -125,8 +108,8 @@
   padding: 0 10px;
   color: var(--secundario);
   background: var(--fundo);
-  border: 1px solid var(--borda);
-  border-radius: 8px;
+  border: 1px solid var(--bordaControle);
+  border-radius: var(--raio-md);
 }
 
 .pesquisa input {
@@ -162,7 +145,7 @@
   color: var(--secundario);
   background: transparent;
   border: 0;
-  border-radius: 7px;
+  border-radius: var(--raio-sm);
   font-size: 12px;
   cursor: pointer;
 }
@@ -189,7 +172,7 @@
   color: var(--secundario);
   text-align: left;
   border-bottom: 1px solid var(--borda);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: .05em;
   white-space: nowrap;
 }
@@ -208,7 +191,7 @@
 .tabelaResponsiva td small {
   margin-top: 4px;
   color: var(--secundario);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .barraNivel {
@@ -217,7 +200,7 @@
   margin-top: 7px;
   overflow: hidden;
   background: var(--borda);
-  border-radius: 5px;
+  border-radius: var(--raio-sm);
 }
 
 .barraNivel span {
@@ -395,8 +378,4 @@
 
 .statusNormal {
   color: var(--statusNormal, #27815d);
-}
-
-.statusEscuro {
-  color: #8fe0ad;
 }

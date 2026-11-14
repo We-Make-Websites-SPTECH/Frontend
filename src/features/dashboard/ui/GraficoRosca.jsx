@@ -24,7 +24,7 @@ function GraficoRosca({ ativos = 0, inativos = 0, percentual = 0, tema }) {
         datasets: [{
           data: total > 0 ? [quantidadeAtivos, quantidadeInativos] : [1, 0],
           backgroundColor: total > 0
-            ? [cores.verde, cores.vermelho]
+            ? [cores.serieA, cores.serieB]
             : [cores.grade, cores.grade],
           borderWidth: 0,
           hoverOffset: 0,
@@ -55,7 +55,7 @@ function GraficoRosca({ ativos = 0, inativos = 0, percentual = 0, tema }) {
       <canvas
         ref={canvasRef}
         role="img"
-        aria-label={`${Math.round(Number(percentual) || 0)}% dos insumos estão ativos`}
+        aria-label={`${Math.round(Number(percentual) || 0)}% dos insumos estão ativos: ${quantidadeAtivos} ativos e ${quantidadeInativos} inativos`}
       />
       <div className={styles.roscaCentro}>
         <strong>{Math.round(Number(percentual) || 0)}%</strong>

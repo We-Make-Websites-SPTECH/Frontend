@@ -20,8 +20,8 @@
   padding: 9px 11px;
   color: var(--texto);
   background: var(--fundo);
-  border: 1px solid var(--borda);
-  border-radius: 8px;
+  border: 1px solid var(--bordaControle);
+  border-radius: var(--raio-md);
 }
 
 .formulario textarea {
@@ -39,30 +39,12 @@
   min-height: auto;
 }
 
-.botaoPrimario,
-.botaoSecundario {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 43px;
-  padding: 10px 15px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 .botaoPrimario {
-  color: #fffdf5;
-  background: var(--primaria);
-  border: 1px solid var(--primaria);
+  composes: primario from './botoes.module.css';
 }
 
 .botaoSecundario {
-  color: var(--texto);
-  background: var(--superficie);
-  border: 1px solid var(--borda);
+  composes: secundario from './botoes.module.css';
 }
 
 .abasTipo {
@@ -70,16 +52,16 @@
   gap: 5px;
   padding: 4px;
   background: var(--fundo);
-  border-radius: 8px;
+  border-radius: var(--raio-md);
 }
 
 .abasTipo button {
   flex: 1;
-  min-height: 37px;
+  min-height: 44px;
   color: var(--secundario);
   background: transparent;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--raio-sm);
   cursor: pointer;
 }
 
@@ -106,8 +88,8 @@
   max-height: 200px;
   overflow-y: auto;
   background: var(--superficie);
-  border: 1px solid var(--borda);
-  border-radius: 8px;
+  border: 1px solid var(--bordaControle);
+  border-radius: var(--raio-md);
   box-shadow: 0 8px 20px #0002;
 }
 
@@ -131,7 +113,7 @@
 
 .sugestoes small {
   color: var(--secundario);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .ajuda {
@@ -155,14 +137,14 @@
   padding: 8px;
   color: var(--texto);
   background: var(--fundo);
-  border: 1px solid var(--borda);
-  border-radius: 7px;
+  border: 1px solid var(--bordaControle);
+  border-radius: var(--raio-sm);
 }
 
 .listaReceita {
   overflow: hidden;
-  border: 1px solid var(--borda);
-  border-radius: 8px;
+  border: 1px solid var(--bordaControle);
+  border-radius: var(--raio-md);
 }
 
 .listaReceita > div {
@@ -214,9 +196,9 @@
 .erro {
   margin: 0;
   padding: 10px 12px;
-  color: var(--primaria, #a12b2b);
+  color: var(--primariaTexto, #a12b2b);
   background: #d65d5614;
-  border: 1px solid #d65d5666;
-  border-radius: 8px;
+  border: 1px solid var(--primariaTexto, #a12b2b);
+  border-radius: var(--raio-md);
   font-size: 12px;
 }
