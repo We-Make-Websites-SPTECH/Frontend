@@ -13,7 +13,7 @@ const pluginValores = {
     const { ctx } = grafico
 
     ctx.save()
-    ctx.font = '600 10px "Roboto", Arial, sans-serif'
+    ctx.font = '600 11px "Roboto", Arial, sans-serif'
     ctx.fillStyle = opcoes.cor
     ctx.textAlign = 'center'
     ctx.textBaseline = 'bottom'
@@ -75,7 +75,7 @@ function GraficoBarras({
         datasets: series.map((serie) => ({
           label: serie.rotulo,
           data: serie.valores,
-          backgroundColor: cores[serie.cor] || cores.vermelho,
+          backgroundColor: cores[serie.cor] || cores.serieB,
           borderRadius: 2,
           borderSkipped: false,
           barPercentage: 0.82,
@@ -95,7 +95,7 @@ function GraficoBarras({
             grid: { display: false },
             ticks: {
               color: cores.secundario,
-              font: { size: 10 },
+              font: { size: 11 },
               maxRotation: 0,
             },
           },
@@ -106,7 +106,7 @@ function GraficoBarras({
             grid: { color: cores.grade },
             ticks: {
               color: cores.secundario,
-              font: { size: 10 },
+              font: { size: 11 },
               stepSize: passo,
               callback: (valor) => formatarNumero(valor),
             },
@@ -145,6 +145,29 @@ function GraficoBarras({
   return (
     <div className={styles.areaGrafico} style={{ height: altura }} ref={areaRef}>
       <canvas ref={canvasRef} role="img" aria-label={ariaLabel} />
+      <table className="somenteLeitor">
+        <caption>{ariaLabel}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Período</th>
+            {series.map((serie) => (
+              <th key={serie.rotulo} scope="col">{serie.rotulo}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rotulos.map((rotulo, indice) => (
+            <tr key={`${rotulo}-${indice}`}>
+              <th scope="row">{rotulo}</th>
+              {series.map((serie) => (
+                <td key={serie.rotulo}>
+                  {formatarNumero(serie.valores[indice])}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }

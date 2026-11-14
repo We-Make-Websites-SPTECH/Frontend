@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from '../../../pages/vendas/style.module.css'
 
 function ModalReceita({ venda, item, estoque, aoFechar, aoSalvar }) {
+  const modalRef = useRef(null)
+  const fecharRef = useRef(aoFechar)
   const [receita, setReceita] = useState(
     item?.receita?.map((ingrediente) => ({ ...ingrediente })) || [],
   )
@@ -9,6 +11,60 @@ function ModalReceita({ venda, item, estoque, aoFechar, aoSalvar }) {
   const [insumoId, setInsumoId] = useState('')
   const [quantidadeIngrediente, setQuantidadeIngrediente] = useState('')
   const [erro, setErro] = useState('')
+
+  useEffect(() => {
+    fecharRef.current = aoFechar
+  })
+
+  useEffect(() => {
+    const anterior = document.activeElement
+    const modal = modalRef.current
+
+    if (!modal) {
+      return undefined
+    }
+
+    const focaveis = modal.querySelectorAll(
+      'button, input, select, textarea, [href], [tabindex]:not([tabindex="-1"])',
+    )
+    const primeiro = focaveis[0]
+    const ultimo = focaveis[focaveis.length - 1]
+    const overflowAnterior = document.body.style.overflow
+
+    primeiro?.focus()
+    document.body.style.overflow = 'hidden'
+
+    function aoTeclar(evento) {
+      if (evento.key === 'Escape') {
+        evento.stopPropagation()
+        fecharRef.current?.()
+        return
+      }
+
+      if (evento.key !== 'Tab' || !focaveis.length) {
+        return
+      }
+
+      if (evento.shiftKey && document.activeElement === primeiro) {
+        evento.preventDefault()
+        ultimo.focus()
+      } else if (!evento.shiftKey && document.activeElement === ultimo) {
+        evento.preventDefault()
+        primeiro.focus()
+      }
+    }
+
+    document.addEventListener('keydown', aoTeclar)
+
+    return () => {
+      document.removeEventListener('keydown', aoTeclar)
+      document.body.style.overflow = overflowAnterior
+
+      if (anterior instanceof HTMLElement) {
+        anterior.focus()
+      }
+    }
+  }, [])
 
   const quantidadeJaAlterada = (venda.variacoes || []).reduce(
     (soma, variacao) => soma + variacao.quantidade,
@@ -92,7 +148,13 @@ function ModalReceita({ venda, item, estoque, aoFechar, aoSalvar }) {
 
   return (
     <div className={styles.fundoModal} onMouseDown={fecharAoClicarNoFundo}>
-      <div className={styles.modal}>
+      <div
+        className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-modal-receita"
+        ref={modalRef}
+      >
         <button
           className={styles.fecharModal}
           type="button"
@@ -102,7 +164,7 @@ function ModalReceita({ venda, item, estoque, aoFechar, aoSalvar }) {
           ×
         </button>
 
-        <h2>Alterar ingredientes</h2>
+        <h2 id="titulo-modal-receita">Alterar ingredientes</h2>
         <p>{item?.nome} · {venda.quantidade} unidades vendidas</p>
         {erro && <p className={styles.erro} role="alert">{erro}</p>}
 

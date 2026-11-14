@@ -100,12 +100,12 @@ function Indicadores({ indicadores, carregando, erro, recarregar, tema }) {
     () => ([
       {
         rotulo: 'Entradas',
-        cor: 'verde',
+        cor: 'serieA',
         valores: semanasEntradas.map((semana) => semana.ENTRADA),
       },
       {
         rotulo: 'Saídas',
-        cor: 'vermelho',
+        cor: 'serieB',
         valores: semanasEntradas.map((semana) => semana.SAIDA),
       },
     ]),
@@ -131,7 +131,7 @@ function Indicadores({ indicadores, carregando, erro, recarregar, tema }) {
     () => ([
       {
         rotulo: 'Perdas',
-        cor: 'vermelho',
+        cor: 'serieB',
         valores: perdasDaUnidade.map((perda) => Number(perda.quantidade) || 0),
       },
     ]),
@@ -192,13 +192,13 @@ function Indicadores({ indicadores, carregando, erro, recarregar, tema }) {
             <div className={styles.resumos}>
               <div>
                 <small>Total Entradas</small>
-                <strong className={totalEntradasTexto === '—' ? styles.semValor : styles.verde}>
+                <strong className={totalEntradasTexto === '—' ? styles.semValor : styles.entrada}>
                   {totalEntradasTexto}
                 </strong>
               </div>
               <div>
                 <small>Total Saídas</small>
-                <strong className={totalSaidasTexto === '—' ? styles.semValor : styles.vermelho}>
+                <strong className={totalSaidasTexto === '—' ? styles.semValor : styles.saida}>
                   {totalSaidasTexto}
                 </strong>
               </div>
@@ -208,11 +208,11 @@ function Indicadores({ indicadores, carregando, erro, recarregar, tema }) {
           <div className={styles.linhaFerramentas}>
             <div className={styles.legenda}>
               <span>
-                <i className={`${styles.ponto} ${styles.pontoVerde}`} />
+                <i className={`${styles.ponto} ${styles.pontoA}`} />
                 Entradas
               </span>
               <span>
-                <i className={`${styles.ponto} ${styles.pontoVermelho}`} />
+                <i className={`${styles.ponto} ${styles.pontoB}`} />
                 Saídas
               </span>
             </div>
@@ -285,14 +285,14 @@ function Indicadores({ indicadores, carregando, erro, recarregar, tema }) {
             <div className={styles.legendaStatus}>
               <div className={styles.linhaStatus}>
                 <span>
-                  <i className={`${styles.ponto} ${styles.pontoVerde}`} />
+                  <i className={`${styles.ponto} ${styles.pontoA}`} />
                   Ativos
                 </span>
                 <strong>{insumosStatus.ativos}</strong>
               </div>
               <div className={styles.linhaStatus}>
                 <span>
-                  <i className={`${styles.ponto} ${styles.pontoVermelho}`} />
+                  <i className={`${styles.ponto} ${styles.pontoB}`} />
                   Inativos
                 </span>
                 <strong>{insumosStatus.inativos}</strong>

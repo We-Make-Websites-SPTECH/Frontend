@@ -77,14 +77,15 @@ function Cardapio({ itens, abrirNovoItem, editarItem, alternarAtivo, estoque }) 
 
         <div className={styles.tabelaResponsiva}>
           <table>
+            <caption className="somenteLeitor">Itens do cardápio</caption>
             <thead>
               <tr>
-                <th>ITEM</th>
-                <th>TAMANHO</th>
-                <th>TIPO</th>
-                <th>INGREDIENTES</th>
-                <th>STATUS</th>
-                <th>AÇÃO</th>
+                <th scope="col">ITEM</th>
+                <th scope="col">TAMANHO</th>
+                <th scope="col">TIPO</th>
+                <th scope="col">INGREDIENTES</th>
+                <th scope="col">STATUS</th>
+                <th scope="col">AÇÃO</th>
               </tr>
             </thead>
             <tbody>

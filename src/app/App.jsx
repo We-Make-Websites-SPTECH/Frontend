@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LogOut, Menu, Moon, Sun, X } from 'lucide-react'
 import { useEstoque } from '../features/estoque/model/useEstoque.jsx'
 import { useCardapio } from '../features/cardapio/model/useCardapio.jsx'
@@ -38,6 +38,20 @@ function lerUsuarioSalvo() {
   return { id, nome }
 }
 
+function lerTemaInicial() {
+  const salvo = localStorage.getItem('tema')
+
+  if (salvo === 'escuro') {
+    return true
+  }
+
+  if (salvo === 'claro') {
+    return false
+  }
+
+  return Boolean(window.matchMedia?.('(prefers-color-scheme: dark)')?.matches)
+}
+
 function App() {
   const [usuario, setUsuario] = useState(lerUsuarioSalvo)
 
@@ -64,8 +78,16 @@ function App() {
 
 function Painel({ usuario, aoSair }) {
   const [pagina, setPagina] = useState('estoque')
-  const [escuro, setEscuro] = useState(false)
+  const [escuro, setEscuro] = useState(lerTemaInicial)
   const [menuAberto, setMenuAberto] = useState(false)
+
+  useEffect(() => {
+    localStorage.setItem('tema', escuro ? 'escuro' : 'claro')
+    document.documentElement.classList.toggle('tema-escuro', escuro)
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', escuro ? '#10191d' : '#f0eee4')
+  }, [escuro])
 
   const indicadoresModel = useIndicadores(
     pagina === 'indicadores' || pagina === 'estoque',
@@ -143,7 +165,9 @@ function Painel({ usuario, aoSair }) {
           <button
             className={styles.botaoTema}
             onClick={() => setEscuro(!escuro)}
-            aria-label="Alternar tema"
+            aria-label="Tema escuro"
+            aria-pressed={escuro}
+            title={escuro ? 'Ativar tema claro' : 'Ativar tema escuro'}
           >
             {escuro ? <Sun size={18} /> : <Moon size={18} />}
           </button>

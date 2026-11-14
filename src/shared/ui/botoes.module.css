@@ -1,0 +1,25 @@
+.primario,
+.secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 43px;
+  padding: 10px 15px;
+  border-radius: var(--raio-md);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primario {
+  color: #fffdf5;
+  background: var(--primariaBotao);
+  border: 1px solid var(--primariaBotao);
+}
+
+.secundario {
+  color: var(--texto);
+  background: var(--superficie);
+  border: 1px solid var(--bordaControle);
+}

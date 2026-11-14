@@ -148,14 +148,15 @@ function Estoque({
 
         <div className={styles.tabelaResponsiva}>
           <table>
+            <caption className="somenteLeitor">Insumos em estoque</caption>
             <thead>
               <tr>
-                <th>INSUMO</th>
-                <th>UNIDADE</th>
-                <th>SALDO ATUAL</th>
-                <th>LIMITE</th>
-                <th>STATUS</th>
-                <th>AÇÃO</th>
+                <th scope="col">INSUMO</th>
+                <th scope="col">UNIDADE</th>
+                <th scope="col">SALDO ATUAL</th>
+                <th scope="col">LIMITE</th>
+                <th scope="col">STATUS</th>
+                <th scope="col">AÇÃO</th>
               </tr>
             </thead>
             <tbody>

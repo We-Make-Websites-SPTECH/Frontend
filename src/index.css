@@ -1,20 +1,60 @@
+:root {
+  --raio-xs: 4px;
+  --raio-sm: 6px;
+  --raio-md: 8px;
+  --raio-lg: 12px;
+  --raio-pilula: 999px;
+}
+
 html {
   min-height: 100%;
   overflow-y: scroll;
   scrollbar-gutter: stable;
 }
 
+.somenteLeitor {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Roboto", Arial, sans-serif;
 }
 
 body {
   min-height: 100vh;
   width: 100%;
+  color: #104547;
   background: #f0eee4;
+  font-family: "Roboto", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color .2s ease;
+}
+
+html.tema-escuro {
+  color-scheme: dark;
+}
+
+html.tema-escuro body {
+  background: #10191d;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.25;
 }
 
 button,
@@ -22,6 +62,7 @@ input,
 select,
 textarea {
   font: inherit;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
 }
 
 button {
@@ -38,4 +79,15 @@ textarea:focus-visible {
 
 #root {
   min-height: 100vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -4,7 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f0eee4" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400..800&display=swap"
+    />
     <title>Primarella | Controle de estoque</title>
+    <script>
+      (function () {
+        try {
+          var tema = localStorage.getItem('tema')
+          var prefereEscuro = window.matchMedia(
+            '(prefers-color-scheme: dark)',
+          ).matches
+
+          if (tema === 'escuro' || (tema !== 'claro' && prefereEscuro)) {
+            document.documentElement.classList.add('tema-escuro')
+            var meta = document.querySelector('meta[name="theme-color"]')
+
+            if (meta) {
+              meta.setAttribute('content', '#10191d')
+            }
+          }
+        } catch (erro) {
+          /* preferência indisponível: mantém o tema claro */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
