@@ -4,6 +4,8 @@ import styles from '../../../shared/ui/formulario.module.css'
 function FormularioInsumo({ dados, aoSalvar }) {
   const [formulario, setFormulario] = useState(dados ? { ...dados } : {
     nome: '',
+    fornecedor: '',
+    contato: '',
     unidade: 'g',
     saldo: 0,
     limite: 0,
@@ -41,6 +43,28 @@ function FormularioInsumo({ dados, aoSalvar }) {
           value={formulario.nome}
           onChange={(evento) => alterar('nome', evento.target.value)}
           placeholder="Ex.: Calabresa"
+        />
+      </label>
+
+      <label htmlFor="fornecedor-insumo">
+        Fornecedor · opcional
+        <input
+          id="fornecedor-insumo"
+          type="text"
+          value={formulario.fornecedor || ''}
+          onChange={(evento) => alterar('fornecedor', evento.target.value)}
+          placeholder="Quem vende este insumo"
+        />
+      </label>
+
+      <label htmlFor="contato-insumo">
+        Contato do fornecedor · opcional
+        <input
+          id="contato-insumo"
+          type="text"
+          value={formulario.contato || ''}
+          onChange={(evento) => alterar('contato', evento.target.value)}
+          placeholder="Telefone, WhatsApp ou e-mail"
         />
       </label>
 

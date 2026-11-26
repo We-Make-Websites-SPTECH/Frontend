@@ -379,3 +379,207 @@
 .statusNormal {
   color: var(--statusNormal, #27815d);
 }
+
+/* Ticker de histórico recente (dados mockados por enquanto) */
+.historico {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 11px 15px;
+  overflow: hidden;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-md);
+}
+
+.historicoTitulo {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  color: var(--secundario);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.historicoJanela {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.historicoJanela:focus-visible {
+  outline: 2px solid #638a8b;
+  outline-offset: 4px;
+  border-radius: var(--raio-xs);
+}
+
+.historicoTrilho {
+  display: flex;
+  width: max-content;
+  animation: historicoRolagem 70s linear infinite;
+}
+
+.historico:hover .historicoTrilho,
+.historico:focus-within .historicoTrilho {
+  animation-play-state: paused;
+}
+
+.historicoItem {
+  margin-right: 28px;
+  color: var(--texto);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.historicoItem b {
+  color: var(--texto);
+}
+
+.historicoAcao {
+  color: var(--primaria);
+  font-weight: 600;
+}
+
+.historicoDetalhe {
+  color: var(--secundario);
+}
+
+@keyframes historicoRolagem {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Modal de notificações de estoque baixo */
+.fundoModal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #071c1e99;
+}
+
+.modalNotificacoes {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: calc(100vh - 40px);
+  padding: 24px;
+  overflow-y: auto;
+  color: var(--texto);
+  background: var(--superficie);
+  border-radius: var(--raio-lg);
+  box-shadow: 0 20px 50px #0005;
+}
+
+.modalNotificacoes h2 {
+  margin: 0 52px 6px 0;
+  font-size: 21px;
+}
+
+.resumoNotificacoes {
+  margin: 0 0 16px;
+  color: var(--secundario);
+  font-size: 13px;
+}
+
+.fecharModal {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  color: var(--texto);
+  background: transparent;
+  border: 0;
+  border-radius: var(--raio-sm);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  place-items: center;
+}
+
+.fecharModal:hover {
+  background: var(--fundo);
+}
+
+.listaNotificacoes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 50vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.listaNotificacoes li {
+  padding: 14px 15px;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-md);
+}
+
+.notificacaoTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notificacaoTopo b {
+  font-size: 14px;
+}
+
+.listaNotificacoes p {
+  margin: 8px 0 0;
+  color: var(--secundario);
+  font-size: 13px;
+}
+
+.listaNotificacoes p b {
+  color: var(--texto);
+}
+
+.fornecedorNotificacao {
+  padding-top: 8px;
+  border-top: 1px solid var(--borda);
+}
+
+.acoesNotificacoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .historicoTrilho {
+    animation: none;
+  }
+
+  .historicoJanela {
+    overflow-x: auto;
+  }
+
+  .historicoCopia {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .acoesNotificacoes {
+    flex-direction: column-reverse;
+  }
+
+  .acoesNotificacoes button {
+    width: 100%;
+  }
+}
