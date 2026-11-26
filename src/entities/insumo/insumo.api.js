@@ -10,6 +10,28 @@ function paraNumero(valor, padrao = 0) {
   return Number.isFinite(numero) ? numero : padrao
 }
 
+function paraTexto(valor) {
+  return typeof valor === 'string' ? valor.trim() : ''
+}
+
+// Mantem apenas os campos que ainda fazem parte do front.
+// O fornecedor/contato tambem ficam locais porque o backend nao os possui.
+function sanitizarMetadados(registro = {}) {
+  const limpo = { limite: paraNumero(registro.limite) }
+  const fornecedor = paraTexto(registro.fornecedor)
+  const contato = paraTexto(registro.contato)
+
+  if (fornecedor) {
+    limpo.fornecedor = fornecedor
+  }
+
+  if (contato) {
+    limpo.contato = contato
+  }
+
+  return limpo
+}
+
 let metadadosSanitizados = false
 
 function lerMetadados() {
@@ -21,16 +43,14 @@ function lerMetadados() {
       metadadosSanitizados = true
       let alterou = false
 
-      // Versões antigas gravavam categoria/fornecedor; mantém apenas o limite.
       Object.keys(metadados).forEach((id) => {
-        const registro = metadados[id] || {}
-        const limpo = { limite: paraNumero(registro.limite) }
+        const registro = metadados[id] && typeof metadados[id] === 'object'
+          ? metadados[id]
+          : {}
+        const limpo = sanitizarMetadados(registro)
 
-        if (
-          registro.categoria !== undefined
-          || registro.fornecedor !== undefined
-          || Object.keys(registro).length !== 1
-        ) {
+        // Descarta campos antigos (como categoria) e normaliza os valores.
+        if (JSON.stringify(registro) !== JSON.stringify(limpo)) {
           metadados[id] = limpo
           alterou = true
         }
@@ -54,11 +74,7 @@ function gravarMetadados(id, insumo) {
 
   const metadados = lerMetadados()
 
-  // Sobrescreve o registro inteiro para descartar categoria/fornecedor
-  // gravados por versoes antigas do front.
-  metadados[id] = {
-    limite: paraNumero(insumo.limite),
-  }
+  metadados[id] = sanitizarMetadados(insumo)
 
   localStorage.setItem(CHAVE_METADADOS, JSON.stringify(metadados))
 }
@@ -74,6 +90,8 @@ function paraInsumo(dto) {
     perda: paraNumero(dto.percentualPerda),
     ativo: dto.ativo !== false,
     limite: paraNumero(metadados.limite),
+    fornecedor: metadados.fornecedor || '',
+    contato: metadados.contato || '',
   }
 }
 

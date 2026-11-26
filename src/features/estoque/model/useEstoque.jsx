@@ -10,6 +10,7 @@ import FormularioMovimento from '../ui/FormularioMovimento'
 
 export function useEstoque({ aoAtualizarIndicadores }) {
   const [estoque, setEstoque] = useState([])
+  const [carregado, setCarregado] = useState(false)
   const [painel, setPainel] = useState(null)
   const [mensagem, setMensagem] = useState('')
 
@@ -76,6 +77,7 @@ export function useEstoque({ aoAtualizarIndicadores }) {
   async function carregarEstoque() {
     const lista = await listarInsumos()
     setEstoque(lista)
+    setCarregado(true)
     return lista
   }
 
@@ -161,6 +163,7 @@ export function useEstoque({ aoAtualizarIndicadores }) {
 
   return {
     estoque,
+    carregado,
     abaixoDoLimite,
     painel,
     mensagem,

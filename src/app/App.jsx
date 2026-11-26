@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
-import { LogOut, Menu, Moon, Sun, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Bell, LogOut, Menu, Moon, Sun, X } from 'lucide-react'
 import { useEstoque } from '../features/estoque/model/useEstoque.jsx'
+import { marcarNotificado, precisaNotificar } from '../features/estoque/model/notificacaoDiaria'
+import { baixarRelatorioCompras } from '../features/estoque/model/relatorioCompras'
+import { NotificacoesEstoque } from '../features/estoque/ui/NotificacoesEstoque'
 import { useCardapio } from '../features/cardapio/model/useCardapio.jsx'
 import { useVendas } from '../features/vendas/model/useVendas'
 import { useIndicadores } from '../features/dashboard/model/useIndicadores'
@@ -80,6 +83,9 @@ function Painel({ usuario, aoSair }) {
   const [pagina, setPagina] = useState('estoque')
   const [escuro, setEscuro] = useState(lerTemaInicial)
   const [menuAberto, setMenuAberto] = useState(false)
+  const [filtroEstoque, setFiltroEstoque] = useState('Todos')
+  const [notificacoesAbertas, setNotificacoesAbertas] = useState(false)
+  const notificacaoVerificada = useRef(false)
 
   useEffect(() => {
     localStorage.setItem('tema', escuro ? 'escuro' : 'claro')
@@ -102,6 +108,25 @@ function Painel({ usuario, aoSair }) {
   })
 
   const nomeExibido = formatarNome(usuario.nome) || 'Usuário'
+
+  // Aviso de estoque baixo: uma vez por usuario por dia, apos o estoque carregar.
+  useEffect(() => {
+    if (!estoqueModel.carregado || notificacaoVerificada.current) {
+      return
+    }
+
+    notificacaoVerificada.current = true
+
+    if (!precisaNotificar(usuario.id)) {
+      return
+    }
+
+    marcarNotificado(usuario.id)
+
+    if (estoqueModel.abaixoDoLimite.length > 0) {
+      setNotificacoesAbertas(true)
+    }
+  }, [estoqueModel.carregado, estoqueModel.abaixoDoLimite, usuario.id])
 
   function navegarPara(novaPagina) {
     setPagina(novaPagina)
@@ -162,20 +187,43 @@ function Painel({ usuario, aoSair }) {
       <main className={styles.principal}>
         <header className={styles.barraSuperior}>
           <span>Controle de estoque</span>
-          <button
-            className={styles.botaoTema}
-            onClick={() => setEscuro(!escuro)}
-            aria-label="Tema escuro"
-            aria-pressed={escuro}
-            title={escuro ? 'Ativar tema claro' : 'Ativar tema escuro'}
-          >
-            {escuro ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
+          <div className={styles.acoesTopo}>
+            <button
+              className={styles.botaoNotificacao}
+              type="button"
+              onClick={() => setNotificacoesAbertas(true)}
+              aria-label={
+                estoqueModel.abaixoDoLimite.length
+                  ? `Notificações: ${estoqueModel.abaixoDoLimite.length} itens abaixo do limite`
+                  : 'Notificações de estoque'
+              }
+              aria-haspopup="dialog"
+              title="Notificações de estoque"
+            >
+              <Bell size={18} />
+              {estoqueModel.abaixoDoLimite.length > 0 && (
+                <span className={styles.contadorNotificacao} aria-hidden="true">
+                  {estoqueModel.abaixoDoLimite.length}
+                </span>
+              )}
+            </button>
+            <button
+              className={styles.botaoTema}
+              onClick={() => setEscuro(!escuro)}
+              aria-label="Tema escuro"
+              aria-pressed={escuro}
+              title={escuro ? 'Ativar tema claro' : 'Ativar tema escuro'}
+            >
+              {escuro ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+          </div>
         </header>
 
         {pagina === 'estoque' && (
           <EstoquePage
             {...estoqueModel}
+            filtro={filtroEstoque}
+            setFiltro={setFiltroEstoque}
             indicadores={indicadoresModel.indicadores}
             carregandoIndicadores={indicadoresModel.carregando}
             erroIndicadores={indicadoresModel.erro}
@@ -231,6 +279,23 @@ function Painel({ usuario, aoSair }) {
             vendasModel.itemModal,
             [...(vendasModel.variacoes[vendasModel.itemModal] || []), variacao],
           )}
+        />
+      )}
+
+      {notificacoesAbertas && (
+        <NotificacoesEstoque
+          itens={estoqueModel.abaixoDoLimite}
+          aoFechar={() => setNotificacoesAbertas(false)}
+          aoVerEstoque={() => {
+            setNotificacoesAbertas(false)
+            setFiltroEstoque('Abaixo do limite')
+            setPagina('estoque')
+          }}
+          aoExportar={() => {
+            if (baixarRelatorioCompras(estoqueModel.abaixoDoLimite)) {
+              estoqueModel.avisar('Relatório de compras exportado.')
+            }
+          }}
         />
       )}
 

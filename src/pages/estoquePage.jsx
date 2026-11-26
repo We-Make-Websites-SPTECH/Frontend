@@ -1,5 +1,6 @@
 import { ArrowRightLeft, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { HistoricoMovimentacoes } from '../features/estoque/ui/HistoricoMovimentacoes'
 import { formatar } from '../shared/lib/formatar'
 import { unidadeDaApi } from '../shared/lib/unidades'
 import styles from './estoque/style.module.css'
@@ -22,9 +23,10 @@ function Estoque({
   abrirNovoInsumo,
   editarInsumo,
   desativarInsumo,
+  filtro,
+  setFiltro,
 }) {
   const [pesquisa, setPesquisa] = useState('')
-  const [filtro, setFiltro] = useState('Todos')
 
   const maisConsumidos = Object.values((indicadores?.insumosMaisConsumidos || []).reduce((grupos, item) => {
     const unidade = unidadeDaApi(item.unidadeMedida)
@@ -63,6 +65,8 @@ function Estoque({
 
   return (
     <section className={styles.conteudo}>
+      <HistoricoMovimentacoes />
+
       <div className={styles.cabecalhoPagina}>
         <div>
           <small>OPERAÇÃO / ESTOQUE</small>
@@ -171,6 +175,9 @@ function Estoque({
                   <tr key={item.id}>
                     <td>
                       <b>{item.nome}</b>
+                      {item.fornecedor && (
+                        <small>Fornecedor: {item.fornecedor}</small>
+                      )}
                     </td>
                     <td>{item.unidade}</td>
                     <td>
